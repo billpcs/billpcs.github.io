@@ -3,13 +3,13 @@
   <head>
 
     <meta charset="utf-8">
-    <title>The Random Blog</title>
-    <meta name="description" content="The Random Blog">
+    <title>The first blog post</title>
+    <meta name="description" content="Undestanding **_frog_** (by doing something else):  I will try to write a function to convert a bit-stream (in the form of a string) to its representation as an IPv4 address.  The catch is, the code must be as concise as possible.  **_Let's try Scala!_** ...">
     <meta name="author"      content="billpcs">
-    <meta name="keywords"    content="programming, ipv4, scala, all, python">
+    <meta name="keywords"    content="programming, scala, python, ipv4">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
     <link rel="icon"      href="/favicon.ico">
-    <link rel="canonical" href="http://www.example.com/index.html">
+    <link rel="canonical" href="http://www.example.com/blog/2016/12/16/the-first-blog-post/">
 
 
     <!-- CSS -->
@@ -84,14 +84,13 @@
         <!-- Main column -->
         <div id="content" class="col-md-12">
 
-          <h1>Welcome</h1>
-          <p>How did you even come here? It was ment to be. Continue reading...</p> 
+
 
 
 
           <article>
   <header>
-    <h2><a href='/blog/2016/12/16/the-first-blog-post/'>The first blog post</a></h2>
+    <h1>The first blog post</h1>
     <p class='date-and-tags'>
 <time datetime="2016-12-16" pubdate="true">2016-12-16</time> :: <span class="tags"><a href="/tags/programming.html">programming</a>, <a href="/tags/scala.html">scala</a>, <a href="/tags/python.html">python</a>, <a href="/tags/ipv4.html">ipv4</a></span></p>
   </header>
@@ -149,8 +148,95 @@
 </pre></div>
 </td></tr></tbody></table>
 </div>
+<!-- more-->
+
+<p><strong><em>Let&rsquo;s try Python!</em></strong></p>
+
+<p>The best way I could come up with, without making and import, is this</p>
+
+<div class="brush: python">
+ <table class="sourcetable">
+  <tbody>
+   <tr>
+    <td class="linenos">
+     <div class="linenodiv">
+      <pre>1
+2
+3
+4</pre></div></td>
+    <td class="code">
+     <div class="source">
+      <pre><span></span>  <span class="k">def</span> <span class="nf">to_ip</span><span class="p">(</span><span class="n">bitstr</span><span class="p">):</span>
+    <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span><span class="n">bitstr</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">8</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bitstr</span><span class="p">),</span> <span class="mi">8</span><span class="p">)]</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">]</span>
+    <span class="k">return</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+<p>and then you can simply call</p>
+
+<div class="brush: python">
+ <table class="sourcetable">
+  <tbody>
+   <tr>
+    <td class="linenos">
+     <div class="linenodiv">
+      <pre>1
+2</pre></div></td>
+    <td class="code">
+     <div class="source">
+      <pre><span></span>  <span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">to_ip</span><span class="p">(</span><span class="s2">"10000000000010100000001000011110"</span><span class="p">))</span>
+  <span class="mf">128.10</span><span class="o">.</span><span class="mf">2.30</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+<p>But one would argue that python is no good without the imports. And I agree, so let&rsquo;s try the same thing, but now with the help of an import.</p>
+
+<div class="brush: python">
+ <table class="sourcetable">
+  <tbody>
+   <tr>
+    <td class="linenos">
+     <div class="linenodiv">
+      <pre>1
+2
+3</pre></div></td>
+    <td class="code">
+     <div class="source">
+      <pre><span></span>  <span class="kn">import</span> <span class="nn">re</span>
+  <span class="k">def</span> <span class="nf">to_ip2</span><span class="p">(</span><span class="n">bitstr</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;........?&#39;</span><span class="p">,</span> <span class="n">bitstr</span><span class="p">)])</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+<p>so now we can call it again and get the expected results</p>
+
+<div class="brush: python">
+ <table class="sourcetable">
+  <tbody>
+   <tr>
+    <td class="linenos">
+     <div class="linenodiv">
+      <pre>1
+2</pre></div></td>
+    <td class="code">
+     <div class="source">
+      <pre><span></span>  <span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">to_ip2</span><span class="p">(</span><span class="s2">"10000000000010100000001000011110"</span><span class="p">))</span>
+  <span class="mf">128.10</span><span class="o">.</span><span class="mf">2.30</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+<p>This is quite concise but it becomes difficult to read.</p>
+
+<p>The classic readability/conciseness problem.</p>
+
+<p>I would argue that it is much clearer in Scala, without giving way to less conciseness.</p>
   <footer>
-    <a href='/blog/2016/12/16/the-first-blog-post/'>&hellip; more &hellip;</a>
+      You are now X minutes closer to death (X is the number of minutes you spent reading this post)
   </footer>
 </article>
         </div>
