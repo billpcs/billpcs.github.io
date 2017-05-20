@@ -1,7 +1,3 @@
 # About page
 
-For now I am just trying to understand how **frog** works
-
-When I do understand, I will be back with more interesting things.
-
-Even some real blog posts. Who knows?
+  > My posts are not scientific papers. I tend to consider them as motivation for thought and so should you.

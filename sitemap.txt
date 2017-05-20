@@ -1,2 +1,3 @@
-http://www.example.com/blog/2016/12/16/the-first-blog-post/
+http://www.example.com/blog/2016/12/16/the-first-blog-post
+http://www.example.com/blog/2017/05/20/the-power-of-abstraction
 http://www.example.com/About.html

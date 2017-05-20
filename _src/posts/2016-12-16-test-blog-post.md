@@ -1,8 +1,8 @@
     Title: The first blog post
     Date: 2016-12-16T17:07:17
-    Tags: programming, scala, python, ipv4
+    Tags: Information Technology
 
-##Undestanding [***frog***][1] (by doing something else)
+###Undestanding [***frog***][1] (by doing something else)
 
 I will try to write a function to convert a bit-stream (in the form of a string)
 to its representation as an [IPv4][2] address.
