@@ -16,8 +16,7 @@
   <content type="html">
 &lt;h3 id="a-simple-demonstration"&gt;A simple demonstration&lt;/h3&gt;
 
-&lt;div class="figure"&gt;&lt;img src="https://i.imgur.com/iT7jjEO.jpg" alt="" /&gt;
- &lt;p class="caption"&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;p&gt;&lt;img src="https://i.imgur.com/iT7jjEO.jpg" class="img-responsive" /&gt;&lt;/p&gt;
 
 &lt;p&gt;You are outside a restaurant. You get in and sit at a table. The waiter brings you the menu and you choose a steak. You tell the waiter about your decision and after some time (hopefully not too much) the waiter brings a steak to your table. You eat the steak and leave.&lt;/p&gt;
 &lt;!-- more--&gt;
@@ -26,7 +25,7 @@
 
 &lt;p&gt;You are outside a restaurant. You get in and sit at a table. You wait for the waiter to come and bring you a menu, but after about 5 minutes you loose your patience. You get up and try to find a menu yourself. After spending a couple of minutes searching you realize there are no menus lying around. &amp;ldquo;Anyway&amp;rdquo;, you think, &amp;ldquo;I already know what I want, I will have a steak&amp;rdquo;. You look around to find the waiter and inform him about your choice. But of course, you have seen no waiter from the time you came in. It has been a long time since you last had a meal so, hungry as you are, you decide to visit the kitchen and tell them yourself about your steak. Frustrated, you storm in only in your amazement, to find no one there. You are truly puzzled by now. But you are more hungry than puzzled so you open the kitchen fridge.&lt;/p&gt;
 
-&lt;p&gt;You get the idea. This can go further and further. You could open the fridge only to find it empty. Because there is no one to supply the steaks the the restaurant. You have to drive on your own to the farm, raise your own animals. Feed them on your own and find their food on your own.&lt;/p&gt;
+&lt;p&gt;You get the idea. This can go further and further. You could open the fridge only to find it empty. Because there is no one to supply the steaks to the restaurant. You have to drive on your own to the farm, raise your own animals. Feed them on your own and find their food on your own.&lt;/p&gt;
 
 &lt;p&gt;You could go as far as to say that you would have to make your own forks, your own chairs, your own fridges, your own trucks, your own stables. Because nothing is made for you. You would have to reach the bare metal to imagine an end to this chain.&lt;/p&gt;
 
