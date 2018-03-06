@@ -1,6 +1,6 @@
     Title: The first blog post
     Date: 2016-12-16T17:07:17
-    Tags: Information Technology
+    Tags: ip, scala, python
 
 ###Undestanding [***frog***][1] (by doing something else)
 
@@ -8,6 +8,8 @@ I will try to write a function to convert a bit-stream (in the form of a string)
 to its representation as an [IPv4][2] address.
 
 The catch is, the code must be as concise as possible.
+
+<!-- more -->
 
 ***Let's try Scala!***
 
@@ -27,16 +29,14 @@ which ```String``` is a member of. But let's not get too involved.
 What it does is given **"123456"** return an iterator with the contents grouped every ***nth***
 character, i.e if n is 2 then we get ```("12", "34", "56")``` which is perfect for this job.
 
-All we have to to then, is map each one to its decimal representation and be done with it.
+All we have to do then, is map each one to its decimal representation and be done with it.
 
-Now we can just do
+Now we can just say
 
 ```scala
   @ toIp("10000000000010100000001000011110")
   res1: String = "128.10.2.30"
 ```
-
-<!-- more -->
 
 ***Let's try Python!***
 

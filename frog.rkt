@@ -4,24 +4,9 @@
 ;; in frog/params.
 (define/contract (init)
   (-> any)
-  (current-scheme/host "http://www.example.com")
-  (current-uri-prefix "/")
+  (current-scheme/host "http://billpcs.github.io")
   (current-title "The Random Blog")
-  (current-author "billpcs")
-  (current-editor "$EDITOR")
-  (current-editor-command "{editor} {filename}")
-  (current-show-tag-counts? #t)
-  (current-permalink "/blog/{year}/{month}/{day}/{title}/index.html")
-  (current-index-full? #f)
-  (current-feed-full? #t)
-  (current-max-feed-items 20)
-  (current-decorate-feed-uris? #t)
-  (current-feed-image-bugs? #t)
-  (current-posts-per-page 10)
-  (current-index-newest-first? #t)
-  (current-posts-index-uri "/index.html")
-  (current-source-dir "_src")
-  (current-output-dir "."))
+  (current-author "bill"))
 
 ;; Called once per post and non-post page, on the contents.
 (define/contract (enhance-body xs)
@@ -29,10 +14,10 @@
   ;; Here we pass the xexprs through a series of functions.
   (~> xs
       (syntax-highlight #:python-executable "python"
-                        #:line-numbers? #t
+                        #:line-numbers? #f
                         #:css-class "source")
       (auto-embed-tweets #:parents? #t)
-      (add-racket-doc-links #:code? #t #:prose? #t)))
+      (add-racket-doc-links #:code? #t #:prose? #f)))
 
 ;; Called from `raco frog --clean`.
 (define/contract (clean)

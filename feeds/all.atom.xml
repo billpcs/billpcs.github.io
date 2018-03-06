@@ -1,195 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
  <title type="text">The Random Blog: The Random Blog</title>
- <link rel="self" href="http://www.example.com/feeds/all.atom.xml" />
- <link href="http://www.example.com/index.html" />
- <id>urn:http-www-example-com:-index-html</id>
+ <link rel="self" href="http://billpcs.github.io/feeds/all.atom.xml" />
+ <link href="http://billpcs.github.io/index.html" />
+ <id>urn:http-billpcs-github-io:-index-html</id>
  <updated>2017-05-20T18:34:27Z</updated>
  <entry>
   <title type="text">The Power Of Abstraction</title>
-  <link rel="alternate" href="http://www.example.com/blog/2017/05/20/the-power-of-abstraction?utm_source=all&amp;utm_medium=Atom" />
-  <id>urn:http-www-example-com:-blog-2017-05-20-the-power-of-abstraction</id>
+  <link rel="alternate" href="http://billpcs.github.io/2017/05/the-power-of-abstraction.html?utm_source=all&amp;utm_medium=Atom" />
+  <id>urn:http-billpcs-github-io:-2017-05-the-power-of-abstraction-html</id>
   <published>2017-05-20T18:34:27Z</published>
   <updated>2017-05-20T18:34:27Z</updated>
   <author>
-   <name>billpcs</name></author>
+   <name>bill</name></author>
   <content type="html">
 &lt;h3 id="a-simple-demonstration"&gt;A simple demonstration&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src="https://i.imgur.com/iT7jjEO.jpg" class="img-responsive" /&gt;&lt;/p&gt;
-
-&lt;p&gt;You are outside a restaurant. You get in and sit at a table. The waiter brings you the menu and you choose a steak. You tell the waiter about your decision and after some time (hopefully not too much) the waiter brings a steak to your table. You eat the steak and leave.&lt;/p&gt;
-&lt;!-- more--&gt;
-
-&lt;p&gt;&lt;strong&gt;To really understand what powerful a concept abstraction is, let&amp;rsquo;s examine how your night would have changed if abstractions were non existent.&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;You are outside a restaurant. You get in and sit at a table. You wait for the waiter to come and bring you a menu, but after about 5 minutes you loose your patience. You get up and try to find a menu yourself. After spending a couple of minutes searching you realize there are no menus lying around. &amp;ldquo;Anyway&amp;rdquo;, you think, &amp;ldquo;I already know what I want, I will have a steak&amp;rdquo;. You look around to find the waiter and inform him about your choice. But of course, you have seen no waiter from the time you came in. It has been a long time since you last had a meal so, hungry as you are, you decide to visit the kitchen and tell them yourself about your steak. Frustrated, you storm in only in your amazement, to find no one there. You are truly puzzled by now. But you are more hungry than puzzled so you open the kitchen fridge.&lt;/p&gt;
-
-&lt;p&gt;You get the idea. This can go further and further. You could open the fridge only to find it empty. Because there is no one to supply the steaks to the restaurant. You have to drive on your own to the farm, raise your own animals. Feed them on your own and find their food on your own.&lt;/p&gt;
-
-&lt;p&gt;You could go as far as to say that you would have to make your own forks, your own chairs, your own fridges, your own trucks, your own stables. Because nothing is made for you. You would have to reach the bare metal to imagine an end to this chain.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Did you notice? The raw materials are there, they are not missing! It is just that there is nobody to abstract them in order to reach you.&lt;/strong&gt;&lt;/p&gt;
-
-&lt;h3 id="so-here-is-how-abstraction-works-in-this-context"&gt;So here is how abstraction works in this context.&lt;/h3&gt;
-
-&lt;p&gt;You don&amp;rsquo;t care how the waiter will pass on your order to the kitchen. It could be by words, by a piece of paper, or by an App on his smart-phone. As long as he does it correctly you don&amp;rsquo;t mind. The waiter on his part, does not care how the kitchen master will cook the steak. He could have his assistants do it, he could do it by himself, use that or the other recipe. The cook is only constrained by what this piece of paper says he has to prepare. When he finishes the dish, he just places it in a special place where the waiter can find it and deliver it to you. In much the same way, we can move down the chain.The cook doesn&amp;rsquo;t care how the meat got in the kitchen, as long as it meets his standards, the driver that brought it doesn&amp;rsquo;t care what kind of meat the box contains, or how it was made, as long as he delivers to the recipient labeled on the box. Moving further down, the meat company CEO has no interest in knowing the specifics of this meat order by the restaurant, as long as his company complies with health and quality standards and there is someone to do the distribution.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;See the pattern? Nobody has to know how anyone above or below him/her works. The only trait needed is to know how to interact with them.&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;One could write endless pages thinking about abstractions and relations in our daily world. But let me stop here.&lt;/p&gt;
-
-&lt;ul&gt;
- &lt;li&gt;
-  &lt;p&gt;The above example may seem obvious. And I will argue that it is. &lt;strong&gt;But only because this pyramid of duties had time to adapt throughout the human history. The challenge comes when you need to scale a system like a company, a product or a protocol with no errors and in little to no time.&lt;/strong&gt;&lt;/p&gt;&lt;/li&gt;
- &lt;li&gt;
-  &lt;p&gt;My goal is to write some follow ups to this post analyzing some of the greatest incarnations of abstractions in technology in todays world.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;</content></entry>
+&lt;p&gt;You are outside a restaurant. You get in and sit at a table. The waiter brings you the menu and you choose a steak. You tell the waiter about your decision and after some time (hopefully not too much) the waiter brings a steak to your table. You eat the steak and leave.&lt;/p&gt;&lt;a href="http://billpcs.github.io/2017/05/the-power-of-abstraction.html?utm_source=all&amp;amp;utm_medium=Atom"&gt;&lt;em&gt;More&amp;hellip;&lt;/em&gt;&lt;/a&gt;</content></entry>
  <entry>
   <title type="text">The first blog post</title>
-  <link rel="alternate" href="http://www.example.com/blog/2016/12/16/the-first-blog-post?utm_source=all&amp;utm_medium=Atom" />
-  <id>urn:http-www-example-com:-blog-2016-12-16-the-first-blog-post</id>
+  <link rel="alternate" href="http://billpcs.github.io/2016/12/the-first-blog-post.html?utm_source=all&amp;utm_medium=Atom" />
+  <id>urn:http-billpcs-github-io:-2016-12-the-first-blog-post-html</id>
   <published>2016-12-16T15:07:17Z</published>
   <updated>2016-12-16T15:07:17Z</updated>
   <author>
-   <name>billpcs</name></author>
+   <name>bill</name></author>
   <content type="html">
 &lt;h3 id="undestanding--by-doing-something-else"&gt;Undestanding &lt;a href="https://github.com/greghendershott/frog"&gt;&lt;strong&gt;&lt;em&gt;frog&lt;/em&gt;&lt;/strong&gt;&lt;/a&gt; (by doing something else)&lt;/h3&gt;
 
 &lt;p&gt;I will try to write a function to convert a bit-stream (in the form of a string) to its representation as an &lt;a href="https://en.wikipedia.org/wiki/IP_address#IPv4_addresses"&gt;IPv4&lt;/a&gt; address.&lt;/p&gt;
 
-&lt;p&gt;The catch is, the code must be as concise as possible.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;&lt;em&gt;Let&amp;rsquo;s try Scala!&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Scala can be very concise and yet readable with some nicely written chains of operations. Let&amp;rsquo;s see it in action here:&lt;/p&gt;
-
-&lt;div class="brush: scala"&gt;
- &lt;table class="sourcetable"&gt;
-  &lt;tbody&gt;
-   &lt;tr&gt;
-    &lt;td class="linenos"&gt;
-     &lt;div class="linenodiv"&gt;
-      &lt;pre&gt;1
-2
-3
-4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;
-    &lt;td class="code"&gt;
-     &lt;div class="source"&gt;
-      &lt;pre&gt;&lt;span&gt;&lt;/span&gt;  &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="n"&gt;toIp&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt;
-     &lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;grouped&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-        &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;el&lt;/span&gt; &lt;span class="k"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Integer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parseInt&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;el&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt;
-        &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mkString&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"."&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;   
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
-&lt;/div&gt;
-
-&lt;p&gt;The &lt;code&gt;grouped(n)&lt;/code&gt; method is defined for all the members of &lt;code&gt;scala.collection.IterableLike&lt;/code&gt; which &lt;code&gt;String&lt;/code&gt; is a member of. But let&amp;rsquo;s not get too involved.&lt;/p&gt;
-
-&lt;p&gt;What it does is given &lt;strong&gt;&amp;ldquo;123456&amp;rdquo;&lt;/strong&gt; return an iterator with the contents grouped every &lt;strong&gt;&lt;em&gt;nth&lt;/em&gt;&lt;/strong&gt; character, i.e if n is 2 then we get &lt;code&gt;("12", "34", "56")&lt;/code&gt; which is perfect for this job.&lt;/p&gt;
-
-&lt;p&gt;All we have to to then, is map each one to its decimal representation and be done with it.&lt;/p&gt;
-
-&lt;p&gt;Now we can just do&lt;/p&gt;
-
-&lt;div class="brush: scala"&gt;
- &lt;table class="sourcetable"&gt;
-  &lt;tbody&gt;
-   &lt;tr&gt;
-    &lt;td class="linenos"&gt;
-     &lt;div class="linenodiv"&gt;
-      &lt;pre&gt;1
-2&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;
-    &lt;td class="code"&gt;
-     &lt;div class="source"&gt;
-      &lt;pre&gt;&lt;span&gt;&lt;/span&gt;  &lt;span class="k"&gt;@&lt;/span&gt; &lt;span class="n"&gt;toIp&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"10000000000010100000001000011110"&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-  &lt;span class="n"&gt;res1&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"128.10.2.30"&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;!-- more--&gt;
-
-&lt;p&gt;&lt;strong&gt;&lt;em&gt;Let&amp;rsquo;s try Python!&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;The best way I could come up with, without making and import, is this&lt;/p&gt;
-
-&lt;div class="brush: python"&gt;
- &lt;table class="sourcetable"&gt;
-  &lt;tbody&gt;
-   &lt;tr&gt;
-    &lt;td class="linenos"&gt;
-     &lt;div class="linenodiv"&gt;
-      &lt;pre&gt;1
-2
-3
-4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;
-    &lt;td class="code"&gt;
-     &lt;div class="source"&gt;
-      &lt;pre&gt;&lt;span&gt;&lt;/span&gt;  &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;to_ip&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;bitstr&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="n"&gt;lst&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;bitstr&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;bitstr&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
-    &lt;span class="n"&gt;res&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;lst&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;.&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
-&lt;/div&gt;
-
-&lt;p&gt;and then you can simply call&lt;/p&gt;
-
-&lt;div class="brush: python"&gt;
- &lt;table class="sourcetable"&gt;
-  &lt;tbody&gt;
-   &lt;tr&gt;
-    &lt;td class="linenos"&gt;
-     &lt;div class="linenodiv"&gt;
-      &lt;pre&gt;1
-2&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;
-    &lt;td class="code"&gt;
-     &lt;div class="source"&gt;
-      &lt;pre&gt;&lt;span&gt;&lt;/span&gt;  &lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;to_ip&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"10000000000010100000001000011110"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-  &lt;span class="mf"&gt;128.10&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mf"&gt;2.30&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
-&lt;/div&gt;
-
-&lt;p&gt;But one would argue that python is no good without the imports. And I agree, so let&amp;rsquo;s try the same thing, but now with the help of an import.&lt;/p&gt;
-
-&lt;div class="brush: python"&gt;
- &lt;table class="sourcetable"&gt;
-  &lt;tbody&gt;
-   &lt;tr&gt;
-    &lt;td class="linenos"&gt;
-     &lt;div class="linenodiv"&gt;
-      &lt;pre&gt;1
-2
-3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;
-    &lt;td class="code"&gt;
-     &lt;div class="source"&gt;
-      &lt;pre&gt;&lt;span&gt;&lt;/span&gt;  &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;re&lt;/span&gt;
-  &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;to_ip2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;bitstr&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;.&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;re&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;findall&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;........?&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;bitstr&lt;/span&gt;&lt;span class="p"&gt;)])&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
-&lt;/div&gt;
-
-&lt;p&gt;so now we can call it again and get the expected results&lt;/p&gt;
-
-&lt;div class="brush: python"&gt;
- &lt;table class="sourcetable"&gt;
-  &lt;tbody&gt;
-   &lt;tr&gt;
-    &lt;td class="linenos"&gt;
-     &lt;div class="linenodiv"&gt;
-      &lt;pre&gt;1
-2&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;
-    &lt;td class="code"&gt;
-     &lt;div class="source"&gt;
-      &lt;pre&gt;&lt;span&gt;&lt;/span&gt;  &lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;to_ip2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"10000000000010100000001000011110"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-  &lt;span class="mf"&gt;128.10&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mf"&gt;2.30&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
-&lt;/div&gt;
-
-&lt;p&gt;This is quite concise but it becomes difficult to read.&lt;/p&gt;
-
-&lt;p&gt;The classic readability/conciseness problem.&lt;/p&gt;
-
-&lt;p&gt;I would argue that it is much clearer in Scala, without giving way to less conciseness.&lt;/p&gt;</content></entry></feed>
+&lt;p&gt;The catch is, the code must be as concise as possible.&lt;/p&gt;&lt;a href="http://billpcs.github.io/2016/12/the-first-blog-post.html?utm_source=all&amp;amp;utm_medium=Atom"&gt;&lt;em&gt;More&amp;hellip;&lt;/em&gt;&lt;/a&gt;</content></entry></feed>

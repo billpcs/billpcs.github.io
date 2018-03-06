@@ -1,28 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
 
     <meta charset="utf-8">
     <title>The Power Of Abstraction</title>
-    <meta name="description" content="A simple demonstration:    You are outside a restaurant. You get in and sit at a table. The waiter brings you the menu and you choose a steak. You tell the waiter about your decision and after some time (hopefully not too much) the waiter brings a steak t...">
-    <meta name="author"      content="billpcs">
-    <meta name="keywords"    content="Information Technology">
-    <meta name="viewport"    content="width=device-width, initial-scale=1.0">
-    <link rel="icon"      href="/favicon.ico">
-    <link rel="canonical" href="http://www.example.com/blog/2017/05/20/the-power-of-abstraction">
-    <link rel="next" href="/blog/2016/12/16/the-first-blog-post">
-
+    <meta name="description" content="A simple demonstration:  You are outside a restaurant. You get in and sit at a table. The waiter brings you the menu and you choose a steak. You tell the waiter about your decision and after some time (hopefully not too much) the waiter brings a steak to ...">
+    <meta name="author" content="bill">
+    <meta name="keywords" content="theory">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="canonical" href="http://billpcs.github.io/2017/05/the-power-of-abstraction.html"> <link rel="next" href="/2016/12/the-first-blog-post.html"> 
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/css/pygments.css">
-    <link rel="stylesheet" type="text/css" href="/css/scribble.css">
-    <link rel="stylesheet" type="text/css" href="/css/custom.css">
     <!-- Feeds -->
-    <!--<link rel="alternate" type="application/atom+xml"
-          href="/feeds/all.atom.xml" title="Atom Feed">
-    <link rel="alternate" type="application/rss+xml"
-          href="/feeds/all.rss.xml" title="RSS Feed">
-        -->
+    <link rel="alternate" type="application/rss+xml" href="/feeds/all.rss.xml" title="RSS Feed">
     <!-- JS -->
     <script type="text/javascript">
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -33,65 +26,60 @@
       ga('create', 'UA-xxxxx', 'auto');
       ga('send', 'pageview');
     </script>
-  </head>
-  <body>
-    <!-- A standard Twitter Bootstrap nav bar -->
-    <header class="navbar navbar-default navbar-inverse"
-            role="banner">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button"
-                  class="navbar-toggle"
-                  data-toggle="collapse"
-                  data-target=".our-nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a href="/index.html" class="navbar-brand">The Random Blog</a>
-        </div>
-        <div class="collapse navbar-collapse our-nav-collapse"
-             role="navigation">
-          <ul class="nav navbar-nav">
+</head>
 
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                Tags <b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <li><a href="/index.html">All Posts</a></li>
+<body>
 
-<li><a href="/tags/Information-Technology.html">Information Technology</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="/About.html">About</a>
-            </li> 
-            <!-- <li><a href="/feeds/all.atom.xml">Atom</a></li>
-            <li><a href="/feeds/all.rss.xml">RSS</a></li> -->
-          </ul>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand"> { The Random Blog } </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation" style="">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarColor02">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/index.html"> Home </a>
+                </li>
+
+
+
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" data-toggle="dropdown">
+                    Tags <b class="caret"></b>
+                  </a>
+
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/tags/ip.html">ip</a><a class="dropdown-item" href="/tags/python.html">python</a><a class="dropdown-item" href="/tags/scala.html">scala</a><a class="dropdown-item" href="/tags/theory.html">theory</a>
+                  </div>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/feeds/all.rss.xml">RSS</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/About.html">About</a>
+                </li>
+            </ul>
         </div>
-      </div>
-    </header>
+    </nav>
+
     <div class="container">
-      <div class="row">
+        <div class="row">
 
-        <!-- Main column -->
-        <div id="content" class="col-md-12">
-
-
-
-
-
-          <article>
-  <header>
-    <h1>The Power Of Abstraction</h1>
-    <p class='date-and-tags'>
-<time datetime="2017-05-20" pubdate="true">2017-05-20</time> :: <span class="tags"><a href="/tags/Information-Technology.html">Information Technology</a></span></p>
-  </header>
+            <!-- Main column -->
+            <div id="content" class="col-md-12">
+                     <article>
+    <div class="jumbotron">
+        <header>
+            <h1>The Power Of Abstraction</h1>
+            <p class='date-and-tags text-success'>
+<time datetime="2017-05-20" pubdate="true">2017-05-20</time> // <span class="tags"><a href="/tags/theory.html">theory</a></span></p>
+            <p class='authors text-info'>By: <span class="authors">bill</span></p>
+        </header>
 
 <h3 id="a-simple-demonstration">A simple demonstration</h3>
-
-<p><img src="https://i.imgur.com/iT7jjEO.jpg" class="img-responsive" /></p>
 
 <p>You are outside a restaurant. You get in and sit at a table. The waiter brings you the menu and you choose a steak. You tell the waiter about your decision and after some time (hopefully not too much) the waiter brings a steak to your table. You eat the steak and leave.</p>
 <!-- more-->
@@ -119,21 +107,44 @@
   <p>The above example may seem obvious. And I will argue that it is. <strong>But only because this pyramid of duties had time to adapt throughout the human history. The challenge comes when you need to scale a system like a company, a product or a protocol with no errors and in little to no time.</strong></p></li>
  <li>
   <p>My goal is to write some follow ups to this post analyzing some of the greatest incarnations of abstractions in technology in todays world.</p></li></ul>
-  <footer>
-      <b>You are now X minutes closer to death (X is the number of minutes you spent reading this post)</b>
-  </footer>
+    </div>
+    <footer>
+        <script type="text/javascript">
+          !function(d,s,id){
+              var js,fjs=d.getElementsByTagName(s)[0];
+              if(!d.getElementById(id)){
+                  js=d.createElement(s);
+                  js.id=id;
+                  js.src="//platform.twitter.com/widgets.js";
+                  fjs.parentNode.insertBefore(js,fjs);
+              }
+          }(document,"script","twitter-wjs");
+        </script>
+        <a href="https://twitter.com/share"
+           class="twitter-share-button"
+           data-url="http://billpcs.github.io/2017/05/the-power-of-abstraction.html"
+           data-dnt="true">
+          "Tweet"</a>
+        <ul class="pager">
+
+        <li class="next">
+          <a href="/2016/12/the-first-blog-post.html"><em>The first blog post</em> &rarr;</a>
+        </li>
+        </ul>
+    </footer>
+    <hr>
 </article>
+            </div>
         </div>
-      </div>
-      <footer>
-        <hr />
-        <p>Site generated
-        by <a href="https://github.com/greghendershott/frog">Frog</a>,
-        the <strong>fr</strong>ozen bl<strong>og</strong> tool.</p>
-      </footer>
+        <footer>
+            <hr />
+            <p>Site generated by <a href="https://github.com/greghendershott/frog">Frog</a>, the <strong>fr</strong>ozen bl<strong>og</strong> tool.</p>
+            <p>Using <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>.</p>
+        </footer>
     </div>
     <!-- </body> JS -->
-    <script type="text/javascript" src="//code.jquery.com/jquery.min.js"></script>
-    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
-  </body>
+    <script type="text/javascript" src="/js/jquery-3.2.1.slim.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.bundle.min.js"></script>
+</body>
+
 </html>

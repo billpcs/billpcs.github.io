@@ -1,11 +1,9 @@
     Title: The Power Of Abstraction
     Date: 2017-05-20T21:34:27
-    Tags: Information Technology
+    Tags: theory
 
 
 ### A simple demonstration
-
-<img src="https://i.imgur.com/iT7jjEO.jpg" class="img-responsive">
 
 You are outside a restaurant. You get in and sit at a table. The waiter brings you the menu and you choose a steak. You tell the waiter about your decision and after some time (hopefully not too much) the waiter brings a steak to your table. You eat the steak and leave.
 

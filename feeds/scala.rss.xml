@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<rss version="2.0">
+ <channel>
+  <title>The Random Blog: Posts tagged 'scala'</title>
+  <description>The Random Blog: Posts tagged 'scala'</description>
+  <link>http://billpcs.github.io/tags/scala.html</link>
+  <lastBuildDate>Fri, 16 Dec 2016 15:07:17 UT</lastBuildDate>
+  <pubDate>Fri, 16 Dec 2016 15:07:17 UT</pubDate>
+  <ttl>1800</ttl>
+  <item>
+   <title>The first blog post</title>
+   <link>http://billpcs.github.io/2016/12/the-first-blog-post.html?utm_source=scala&amp;utm_medium=RSS</link>
+   <guid isPermaLink="false">urn:http-billpcs-github-io:-2016-12-the-first-blog-post-html</guid>
+   <pubDate>Fri, 16 Dec 2016 15:07:17 UT</pubDate>
+   <author>bill</author>
+   <description>
+&lt;h3 id="undestanding--by-doing-something-else"&gt;Undestanding &lt;a href="https://github.com/greghendershott/frog"&gt;&lt;strong&gt;&lt;em&gt;frog&lt;/em&gt;&lt;/strong&gt;&lt;/a&gt; (by doing something else)&lt;/h3&gt;
+
+&lt;p&gt;I will try to write a function to convert a bit-stream (in the form of a string) to its representation as an &lt;a href="https://en.wikipedia.org/wiki/IP_address#IPv4_addresses"&gt;IPv4&lt;/a&gt; address.&lt;/p&gt;
+
+&lt;p&gt;The catch is, the code must be as concise as possible.&lt;/p&gt;&lt;a href="http://billpcs.github.io/2016/12/the-first-blog-post.html?utm_source=scala&amp;amp;utm_medium=RSS"&gt;&lt;em&gt;More&amp;hellip;&lt;/em&gt;&lt;/a&gt;</description></item></channel></rss>

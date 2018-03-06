@@ -1,10 +1,15 @@
 <article>
-  <header>
-    <h1>@|title|</h1>
-    <p class='date-and-tags'>@|date| :: @|tags|</p>
-  </header>
-  @|content|
-  <footer>
-      <b>You are now X minutes closer to death (X is the number of minutes you spent reading this post)</b>
-  </footer>
+    <div class="jumbotron">
+        <header>
+            <h1>@|title|</h1>
+            <p class='date-and-tags text-success'>@|date| // @|tags|</p>
+            <p class='authors text-info'>By: @|authors|</p>
+        </header>
+        @|content|
+    </div>
+    <footer>
+        @twitter-share-button[full-uri]
+        @older/newer-links[older-uri older-title newer-uri newer-title]
+    </footer>
+    <hr>
 </article>

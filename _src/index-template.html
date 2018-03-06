@@ -1,11 +1,14 @@
 <article>
+  <div class="jumbotron">
   <header>
-    <h2><a href='@|uri-path|'>@|title|</a></h2>
-    <p class='date-and-tags'>@|date| :: @|tags|</p>
+    <h3><a href='@|uri-path|'>@|title|</a></h3>
+    <p class='date-and-tags text-success'>@|date| // @|tags|</p>
+    <p class='authors text-info'>By: @|authors|</p>
   </header>
   @|content-only|
   @(when more?
     @list{<footer>
             <a href='@|uri-path|'>&hellip; more &hellip;</a>
           </footer>})
+  </div>
 </article>
