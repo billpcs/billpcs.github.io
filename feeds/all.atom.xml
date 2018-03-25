@@ -4,7 +4,23 @@
  <link rel="self" href="http://billpcs.github.io/feeds/all.atom.xml" />
  <link href="http://billpcs.github.io/index.html" />
  <id>urn:http-billpcs-github-io:-index-html</id>
- <updated>2017-05-20T18:34:27Z</updated>
+ <updated>2018-03-25T13:22:29Z</updated>
+ <entry>
+  <title type="text">SDES in Scala</title>
+  <link rel="alternate" href="http://billpcs.github.io/2018/03/sdes-in-scala.html?utm_source=all&amp;utm_medium=Atom" />
+  <id>urn:http-billpcs-github-io:-2018-03-sdes-in-scala-html</id>
+  <published>2018-03-25T13:22:29Z</published>
+  <updated>2018-03-25T13:22:29Z</updated>
+  <author>
+   <name>bill</name></author>
+  <content type="html">
+&lt;h1 id="implementing-simplified-data-encryption-standard-in-scala"&gt;Implementing Simplified Data Encryption Standard in Scala&lt;/h1&gt;
+
+&lt;p&gt;&lt;em&gt;(I intended for this blog post to be a full explanation of my SDES implementation, but it got too long too fast. Therefore, in this post I focused mostly on the binary number representation and didn&amp;rsquo;t analyze other topics such as the test suite and the class hierarchies, topics that I will maybe address in a future post &amp;mdash;probably never)&lt;/em&gt;&lt;/p&gt;
+
+&lt;h3 id="intro"&gt;Intro&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Data_Encryption_Standard"&gt;DES&lt;/a&gt; is a symmetric algorithm for encrypting data. Simplified DES or SDES, as I will refer to it from now on, is a simple version of DES, which is used to familiarize the students with the inner workings of the algorithm without getting too involved with details. I happened to implement it for a semester course project and below are some of my thoughts.&lt;/p&gt;&lt;a href="http://billpcs.github.io/2018/03/sdes-in-scala.html?utm_source=all&amp;amp;utm_medium=Atom"&gt;&lt;em&gt;More&amp;hellip;&lt;/em&gt;&lt;/a&gt;</content></entry>
  <entry>
   <title type="text">The Power Of Abstraction</title>
   <link rel="alternate" href="http://billpcs.github.io/2017/05/the-power-of-abstraction.html?utm_source=all&amp;utm_medium=Atom" />

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <title>SDES in Scala</title>
+    <meta name="description" content="Implementing Simplified Data Encryption Standard in Scala:  _(I intended for this blog post to be a full explanation of my SDES implementation, but it got too long too fast. Therefore, in this post I focused mostly on the binary number representation and ...">
+    <meta name="author" content="bill">
+    <meta name="keywords" content="scala, cryptography">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="canonical" href="http://billpcs.github.io/2018/03/sdes-in-scala.html"> <link rel="next" href="/2017/05/the-power-of-abstraction.html"> 
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/pygments.css">
+    <!-- Feeds -->
+    <link rel="alternate" type="application/rss+xml" href="/feeds/all.rss.xml" title="RSS Feed">
+    <!-- JS -->
+    <script type="text/javascript">
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-xxxxx', 'auto');
+      ga('send', 'pageview');
+    </script>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand"> { The Random Blog } </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation" style="">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarColor02">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/index.html"> Home </a>
+                </li>
+
+
+
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" data-toggle="dropdown">
+                    Tags <b class="caret"></b>
+                  </a>
+
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/tags/cryptography.html">cryptography</a><a class="dropdown-item" href="/tags/ip.html">ip</a><a class="dropdown-item" href="/tags/python.html">python</a><a class="dropdown-item" href="/tags/scala.html">scala</a><a class="dropdown-item" href="/tags/theory.html">theory</a>
+                  </div>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/feeds/all.rss.xml">RSS</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/About.html">About</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+
+            <!-- Main column -->
+            <div id="content" class="col-md-12">
+                     <article>
+    <div class="jumbotron">
+        <header>
+            <h1>SDES in Scala</h1>
+            <p class='date-and-tags text-success'>
+<time datetime="2018-03-25" pubdate="true">2018-03-25</time> // <span class="tags"><a href="/tags/scala.html">scala</a>, <a href="/tags/cryptography.html">cryptography</a></span></p>
+            <p class='authors text-info'>By: <span class="authors">bill</span></p>
+        </header>
+
+<h1 id="implementing-simplified-data-encryption-standard-in-scala">Implementing Simplified Data Encryption Standard in Scala</h1>
+
+<p><em>(I intended for this blog post to be a full explanation of my SDES implementation, but it got too long too fast. Therefore, in this post I focused mostly on the binary number representation and didn&rsquo;t analyze other topics such as the test suite and the class hierarchies, topics that I will maybe address in a future post &mdash;probably never)</em></p>
+
+<h3 id="intro">Intro</h3>
+
+<p><a href="https://en.wikipedia.org/wiki/Data_Encryption_Standard">DES</a> is a symmetric algorithm for encrypting data. Simplified DES or SDES, as I will refer to it from now on, is a simple version of DES, which is used to familiarize the students with the inner workings of the algorithm without getting too involved with details. I happened to implement it for a semester course project and below are some of my thoughts.</p>
+<!-- more-->
+
+<h3 id="what-i-wanted-to-do-differently">What I wanted to do differently</h3>
+
+<p>One of the first things I had to consider was how the binary numbers were going to be dealt with internally. Programming languages don&rsquo;t usually have variable types for &ldquo;Bit&rdquo;. The variable type with the smallest amount of memory you can generally get is a Byte. SDES uses binary numbers of three sizes: <strong>4</strong>, <strong>8</strong> and <strong>10 bit</strong> numbers.</p>
+
+<p>What I came across regularly when browsing solutions on SDES was people saving binary numbers as arrays of integers, meaning saving 1&rsquo;s and 0&rsquo;s in an array. I didn&rsquo;t like this approach for various reasons. Firstly, it wastes too much space. This is because, even though we save the information of <strong>one</strong> bit in one array cell, it takes the space of at least 8 bits, if we decide to make it an Array[Byte] (and this is the best we can do in terms of memory with this type). This also means that we have to implement bitwise operations that are used extensively in SDES, from scratch. A <em>bitwise xor</em> for example would probably have to be implemented as presented below:</p>
+
+<div class="brush: scala">
+ <div class="source">
+  <pre><span></span><span class="k">type</span> <span class="kt">Binary</span> <span class="o">=</span> <span class="nc">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]</span>
+<span class="k">def</span> <span class="n">xor</span><span class="o">(</span><span class="n">xs</span><span class="k">:</span> <span class="kt">Binary</span><span class="o">,</span> <span class="n">ys</span><span class="k">:</span> <span class="kt">Binary</span><span class="o">)</span><span class="k">:</span> <span class="kt">Binary</span> <span class="o">=</span>
+    <span class="k">for</span> <span class="o">{</span>
+      <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">)</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="n">xs</span> <span class="n">zip</span> <span class="n">ys</span><span class="o">)</span>
+    <span class="o">}</span> <span class="k">yield</span> <span class="o">(</span><span class="n">a</span> <span class="o">^</span> <span class="n">b</span><span class="o">).</span><span class="n">toByte</span>
+</pre></div>
+
+</div>
+
+<p>Let&rsquo;s break up the above function.</p>
+
+<p>The first line just says <em>&ldquo;Instead of me writing <code>Array[Byte]</code> all the time, from now on I will refer to it as <code>Binary</code>&rdquo;</em>. This way the function is more readable and shorter. In other words, <code>Binary</code> is an <em>alias</em> for <code>Array[Byte]</code>.</p>
+
+<p>Then we define the function <code>xor</code>, which receives two binary numbers (of type <code>Binary</code>) and outputs a third one, as should a <em>xor</em> function do. Internally, it zips the two arrays, creating an array of pairs, which then takes one by one and yields the result using the <code>^</code> function defined for <code>Byte</code>.</p>
+
+<p>The <em>xor</em> function <code>^</code> is in reality a bitwise operator and because the array contains only 1&rsquo;s and 0&rsquo;s, it works as expected and produces correct results.</p>
+
+<p>Notice that the running time of the above function is linear and depends on length of the array, i.e the number of bits, as we have to pass through the whole array and <code>xor</code> the elements one by one. This is another reason I don&rsquo;t like this solution.</p>
+
+<h3 id="my-solution">My Solution</h3>
+
+<p>So, after noting these two problems, I started thinking about a different solution. In order for <code>xor</code> operations to execute in almost constant time, we could have <strong>the whole binary number saved in a Short integer</strong>. In this way the operation can be done in one go. With a single <code>^</code> we can have the result of what previously we created a O(n) function for. A <code>Short</code> can be 16bits, which means we can save the 4, 8 and 10 bit numbers we need, in a single <em>Short</em>. With this approach we kill two birds with one stone, as we also solve the problem of using too much memory. Let&rsquo;s see why.</p>
+
+<h4 id="memory">Memory</h4>
+
+<p>For starters, let&rsquo;s examine the impact on the memory usage for storing a 4bit number in these two cases.</p>
+
+<p>In the case of the <code>Array[Byte]</code> we would have 4 elements, each with a size of a <code>Byte</code> meaning 4*8 = 32 bits.</p>
+
+<p>In the second case we would use a Short to store the 4bit number, meaning 16 bits.</p>
+
+<p>In the case of 10bit numbers, the first way yields <em>80 bits</em> and the second stays the same: 16 bits. We can thus see, that even in the worst case, the second way uses less memory.</p>
+
+<p>With some <a href="https://www.youtube.com/watch?v=X09oxyIeGuY">quick maths</a>, for the worst case we get 50% less memory usage and for the best case 80% less memory usage.</p>
+
+<h5 id="speed">Speed</h5>
+
+<p>For bitwise operations we should get a ~4x to 10x speedup (depending on which binary size is the mean). But not everything in the algorithm is about bitwise operations so this figure should be much much lower when executing a whole cycle of the algorithm.</p>
+
+<p>After running some benchmarks, using <a href="https://scalameter.github.io/">Scalameter</a>, it turns out that the second approach gives a <strong>~2x speedup</strong>. Before seeing how this number came out to be, we should first take closer a look at some key elements of my implementation and then contrast it with how this would change for the &ldquo;array way&rdquo; of looking at binary numbers.</p>
+
+<p>For simplicity, we are going to consider the 4 bit case.The other two cases (8 and 10 bit) are almost the same, having only minor differences.</p>
+
+<h5 id="bit4">Bit4</h5>
+
+<p>I decided to call the class which is going to contain the information for a 4 bit number <code>Bit4</code>. So let&rsquo;s start with a constructor.</p>
+
+<div class="brush: scala">
+ <div class="source">
+  <pre><span></span><span class="k">class</span> <span class="nc">Bit4</span><span class="o">(</span><span class="k">val</span> <span class="n">v</span><span class="k">:</span> <span class="kt">Short</span><span class="o">)</span>
+</pre></div>
+
+</div>
+
+<p>Then, have to implement the <code>xor</code> method:</p>
+
+<div class="brush: scala">
+ <div class="source">
+  <pre><span></span><span class="k">class</span> <span class="nc">Bit4</span><span class="o">(</span><span class="k">val</span> <span class="n">v</span><span class="k">:</span> <span class="kt">Short</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="o">|^|(</span><span class="n">that</span><span class="k">:</span> <span class="kt">Bit4</span><span class="o">)</span> <span class="k">=</span>
+    <span class="nc">Bit4</span><span class="o">((</span><span class="k">this</span><span class="o">.</span><span class="n">v</span> <span class="o">^</span> <span class="n">that</span><span class="o">.</span><span class="n">v</span><span class="o">).</span><span class="n">toShort</span><span class="o">)</span>
+<span class="o">}</span>
+</pre></div>
+
+</div>
+
+<p>But this is wrong! We only want the 4 LSB of the value <code>v</code> to be accounted for in the result. By doing this we get values greater than the range a 4 bit number could have. Since numbers are represented in <code>two's complement</code> format, the range for 4 bits is [&ndash;8 to 7]. So, how can we solve this problem?</p>
+
+<h5 id="bit-masks-to-the-rescue">Bit masks to the rescue!</h5>
+
+<p>I really don&rsquo;t know if there is a better way, but here is what I did.</p>
+
+<div class="brush: scala">
+ <div class="source">
+  <pre><span></span><span class="k">class</span> <span class="nc">Bit4</span><span class="o">(</span><span class="k">private</span> <span class="k">val</span> <span class="n">v</span><span class="k">:</span> <span class="kt">Short</span><span class="o">)</span> <span class="o">{</span>
+
+  <span class="k">val</span> <span class="n">value</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(((</span><span class="n">v</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="o">)</span> <span class="o">&amp;</span> <span class="mh">0x1</span><span class="o">)</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">(</span><span class="mh">0xFFFFFFF0</span> <span class="o">|</span> <span class="o">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="o">)).</span><span class="n">toShort</span>
+    <span class="k">else</span> <span class="o">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="o">).</span><span class="n">toShort</span>
+  <span class="o">}</span>
+
+  <span class="k">def</span> <span class="o">|^|(</span><span class="n">that</span><span class="k">:</span> <span class="kt">Bit4</span><span class="o">)</span> <span class="k">=</span>
+    <span class="nc">Bit4</span><span class="o">((</span><span class="k">this</span><span class="o">.</span><span class="n">value</span> <span class="o">^</span> <span class="n">that</span><span class="o">.</span><span class="n">value</span><span class="o">).</span><span class="n">toShort</span><span class="o">)</span>
+<span class="o">}</span>
+</pre></div>
+
+</div>
+
+<p>What the above code does is check whether we need to do a sign extension with ones, i.e checks if the MSB is one. If it is, we mask the 4 LSB and sign extend the rest. If it is not, we just mask the 4 LSB. This way, whatever the input value to the constructor, the <code>value</code> will always contain a number in the correct range. If the initial element was not in the correct range, then it is a problem of the caller. I have made the decision not to report anything back or throw an exception.</p>
+
+<p>The final code for <code>Bit4</code> looks something like this:</p>
+
+<div class="brush: scala">
+ <div class="source">
+  <pre><span></span><span class="k">case</span> <span class="k">class</span> <span class="nc">Bit8</span><span class="o">(</span><span class="n">v</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">BinaryNum</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="k">this</span><span class="o">(</span><span class="n">s</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span> <span class="k">this</span><span class="o">(</span><span class="nc">Integer</span><span class="o">.</span><span class="n">parseInt</span><span class="o">(</span><span class="n">s</span><span class="o">,</span> <span class="mi">2</span><span class="o">).</span><span class="n">toShort</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="k">this</span><span class="o">(</span><span class="n">ar</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Bit</span><span class="o">])</span> <span class="k">=</span> <span class="k">this</span><span class="o">(</span><span class="n">ar</span><span class="o">.</span><span class="n">mkString</span><span class="o">)</span>
+
+  <span class="c1">// consider the input as a 4bit two&#39;s complement</span>
+  <span class="c1">// so do sign extension as required</span>
+  <span class="k">val</span> <span class="n">value</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(((</span><span class="n">v</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="o">)</span> <span class="o">&amp;</span> <span class="mh">0x1</span><span class="o">)</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">(</span><span class="mh">0xFFFFFFF0</span> <span class="o">|</span> <span class="o">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="o">)).</span><span class="n">toShort</span>
+    <span class="k">else</span> <span class="o">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="o">).</span><span class="n">toShort</span>
+  <span class="o">}</span>
+
+  <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">n</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">Bit</span> <span class="o">=</span> <span class="nc">Bit</span><span class="o">(((</span><span class="k">this</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;&gt;</span> <span class="o">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">n</span><span class="o">))</span> <span class="o">&amp;</span> <span class="mh">0x1</span><span class="o">).</span><span class="n">toByte</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="n">map</span><span class="o">(</span><span class="n">f</span><span class="k">:</span> <span class="kt">Short</span> <span class="o">=&gt;</span> <span class="nc">Short</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Bit4</span><span class="o">(</span><span class="n">f</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="n">value</span><span class="o">))</span>
+
+  <span class="k">def</span> <span class="n">flatMap</span><span class="o">(</span><span class="n">f</span><span class="k">:</span> <span class="kt">Short</span> <span class="o">=&gt;</span> <span class="nc">Bit4</span><span class="o">)</span><span class="k">:</span> <span class="kt">Bit4</span> <span class="o">=</span> <span class="n">f</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="n">value</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="n">map2</span><span class="o">(</span><span class="n">that</span><span class="k">:</span> <span class="kt">Bit4</span><span class="o">)(</span><span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">Short</span><span class="o">,</span> <span class="kt">Short</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">Short</span><span class="o">)</span><span class="k">:</span> <span class="kt">Bit4</span> <span class="o">=</span> <span class="k">for</span> <span class="o">{</span>
+    <span class="n">a</span> <span class="k">&lt;-</span> <span class="k">this</span>
+    <span class="n">b</span> <span class="k">&lt;-</span> <span class="n">that</span>
+  <span class="o">}</span> <span class="k">yield</span> <span class="n">f</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="o">|^|(</span><span class="n">that</span><span class="k">:</span> <span class="kt">Bit4</span><span class="o">)</span><span class="k">:</span> <span class="kt">Bit4</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="n">map2</span><span class="o">(</span><span class="n">that</span><span class="o">)(</span><span class="k">_</span> <span class="o">^</span> <span class="k">_</span> <span class="n">toShort</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="n">toBits</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Bit</span><span class="o">]</span> <span class="k">=</span> <span class="o">(</span><span class="mi">1</span> <span class="n">to</span> <span class="mi">4</span><span class="o">).</span><span class="n">map</span><span class="o">(</span><span class="k">this</span> <span class="o">(</span><span class="k">_</span><span class="o">)).</span><span class="n">toArray</span>
+
+  <span class="k">def</span> <span class="n">binary</span> <span class="k">=</span> <span class="n">intTo8BitString</span><span class="o">(</span><span class="n">value</span><span class="o">)</span> <span class="n">drop</span> <span class="mi">4</span>
+
+  <span class="k">def</span> <span class="n">concat</span><span class="o">(</span><span class="n">that</span><span class="k">:</span> <span class="kt">Bit4</span><span class="o">)</span><span class="k">:</span> <span class="kt">Bit8</span> <span class="o">=</span> <span class="nc">Bit8</span><span class="o">(((</span><span class="k">this</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="o">)</span> <span class="o">|</span> <span class="o">(</span><span class="n">that</span><span class="o">.</span><span class="n">value</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="o">)).</span><span class="n">toByte</span><span class="o">)</span>
+
+  <span class="k">override</span> <span class="k">def</span> <span class="n">equals</span><span class="o">(</span><span class="n">o</span><span class="k">:</span> <span class="kt">scala.Any</span><span class="o">)</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="n">o</span> <span class="k">match</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="n">x</span><span class="k">:</span> <span class="kt">Bit4</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="kc">false</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+
+</div>
+
+<p>I have just made two auxiliary constructors for creating a Bit4 by passing a binary string (e.g Bit4(&ldquo;0010&rdquo;)) or by passing an array of bits. I also made the class a <em><strong>case class</strong></em> and added an <code>apply</code> method. Without the case class (or a companion object) you would have to write <code>new Bit4(4)</code> when creating instances. What Scala allows with case classes is to remove the need for the <code>new</code> keyword. We can simply write <code>Bit4(10)</code> and create instances throughout the code base. The way the <code>apply</code> method is implemented allows for this kind of syntax:</p>
+
+<div class="brush: scala">
+ <div class="source">
+  <pre><span></span><span class="n">scala</span><span class="o">&gt;</span> <span class="k">val</span> <span class="n">num</span> <span class="k">=</span> <span class="n">sdes</span><span class="o">.</span><span class="nc">Bit4</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
+<span class="n">num</span><span class="k">:</span> <span class="kt">sdes.Bit4</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">(</span><span class="mi">0</span><span class="n">b0100</span><span class="o">)</span>
+
+<span class="n">scala</span><span class="o">&gt;</span> <span class="n">num</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+<span class="n">res0</span><span class="k">:</span> <span class="kt">sdes.Bit</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+
+</div>
+
+<p>Because many times, during the execution of the algorithm we need to extract a certain bit out of the binary number, this method allows as to do so easily. For instance, if we want to get the second bit as in the above example (counting from the MSB) we just need to call <code>num(2)</code> and we will get <code>1</code> as expected. We could have easily made a method called <code>getBit(n: Int): Bit</code>, but to me, the usage of apply here makes the Bit4 class a seem more like a list of bits.</p>
+
+<p>BinaryNum is just a base trait for all the classes (Bit4, Bit8 and Bit10).</p>
+
+<p>That&rsquo;s all.</p>
+
+<h4 id="the-benchmark">The benchmark</h4>
+
+<p>I wanted to see if my reasoning for choosing this method was correct and there was indeed a remarkable performance penalty when using arrays to represent binary numbers.</p>
+
+<p>In order to test the performance, I had to make some changes and the main such change was made to the |^| function (the <code>concat</code> and <code>split</code> functions also needed to be changed, but you can check them out yourself).</p>
+
+<div class="brush: scala">
+ <div class="source">
+  <pre><span></span>  <span class="c1">// ....</span>
+
+  <span class="k">lazy</span> <span class="k">val</span> <span class="n">bvalue</span> <span class="k">=</span> <span class="n">toBits</span>
+
+  <span class="k">def</span> <span class="o">|^|(</span><span class="n">that</span><span class="k">:</span> <span class="kt">Bit4</span><span class="o">)</span><span class="k">:</span> <span class="kt">Bit4</span> <span class="o">=</span>
+    <span class="nc">Bit4</span><span class="o">((</span><span class="k">this</span><span class="o">.</span><span class="n">bvalue</span> <span class="n">zip</span> <span class="n">that</span><span class="o">.</span><span class="n">bvalue</span><span class="o">).</span><span class="n">map</span><span class="o">{</span>
+      <span class="k">case</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">)</span> <span class="k">=&gt;</span>  <span class="nc">Bit</span><span class="o">((</span><span class="n">a</span><span class="o">.</span><span class="n">value</span> <span class="o">^</span> <span class="n">b</span><span class="o">.</span><span class="n">value</span><span class="o">).</span><span class="n">toByte</span><span class="o">)</span>
+    <span class="o">})</span>
+
+  <span class="c1">// ...</span>
+</pre></div>
+
+</div>
+
+<p>I ran the following code using Scalameter</p>
+
+<div class="brush: scala">
+ <div class="source">
+  <pre><span></span><span class="k">import</span> <span class="nn">org.scalameter.api._</span>
+
+<span class="k">object</span> <span class="nc">RangeBenchmark</span> <span class="k">extends</span> <span class="nc">Bench</span><span class="o">.</span><span class="nc">ForkedTime</span> <span class="o">{</span>
+  <span class="k">val</span> <span class="n">ranges</span> <span class="k">=</span> <span class="k">for</span> <span class="o">{</span>
+    <span class="n">size</span> <span class="k">&lt;-</span> <span class="nc">Gen</span><span class="o">.</span><span class="n">range</span><span class="o">(</span><span class="s">"size"</span><span class="o">)(</span><span class="mi">1000</span><span class="o">,</span> <span class="mi">2000</span><span class="o">,</span> <span class="mi">100</span><span class="o">)</span>
+  <span class="o">}</span> <span class="k">yield</span> <span class="mi">0</span> <span class="n">until</span> <span class="n">size</span>
+
+  <span class="k">val</span> <span class="n">encdec</span> <span class="k">=</span> <span class="n">sdes</span><span class="o">.</span><span class="nc">SDES</span><span class="o">(</span><span class="mi">12</span><span class="o">)</span>
+
+  <span class="k">val</span> <span class="n">m</span> <span class="k">=</span> <span class="n">measure</span> <span class="n">method</span> <span class="s">"encrypt/decrypt"</span> <span class="n">in</span> <span class="o">{</span>
+    <span class="n">using</span><span class="o">(</span><span class="n">ranges</span><span class="o">)</span> <span class="n">in</span> <span class="o">{</span>
+      <span class="k">_</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">el</span> <span class="k">=&gt;</span> <span class="n">encdec</span><span class="o">.</span><span class="n">decryptByte</span><span class="o">(</span><span class="n">encdec</span><span class="o">.</span><span class="n">encryptByte</span><span class="o">(</span><span class="n">el</span><span class="o">.</span><span class="n">toByte</span><span class="o">)))</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+
+</div>
+
+<p>The results in milliseconds rounded to the nearest integer are given below:</p>
+
+<div class="brush: scala">
+ <div class="source">
+  <pre><span></span><span class="c1">// xor with array</span>
+<span class="k">val</span> <span class="n">xor_ar</span> <span class="k">=</span> <span class="nc">Array</span><span class="o">(</span><span class="mi">45</span><span class="o">,</span> <span class="mi">51</span><span class="o">,</span> <span class="mi">55</span><span class="o">,</span> <span class="mi">59</span><span class="o">,</span> <span class="mi">64</span><span class="o">,</span> <span class="mi">68</span><span class="o">,</span> <span class="mi">73</span><span class="o">,</span> <span class="mi">80</span><span class="o">,</span> <span class="mi">91</span><span class="o">,</span> <span class="mi">96</span><span class="o">,</span> <span class="mi">99</span><span class="o">)</span>
+
+<span class="c1">//xor native</span>
+<span class="k">val</span> <span class="n">xor_nt</span> <span class="k">=</span> <span class="nc">Array</span><span class="o">(</span><span class="mi">20</span><span class="o">,</span> <span class="mi">26</span><span class="o">,</span> <span class="mi">28</span><span class="o">,</span> <span class="mi">30</span><span class="o">,</span> <span class="mi">32</span><span class="o">,</span> <span class="mi">34</span><span class="o">,</span> <span class="mi">36</span><span class="o">,</span> <span class="mi">39</span><span class="o">,</span> <span class="mi">41</span><span class="o">,</span> <span class="mi">43</span><span class="o">,</span> <span class="mi">45</span><span class="o">)</span>
+</pre></div>
+
+</div>
+
+<p>The average speedup is:</p>
+
+<div class="brush: scala">
+ <div class="source">
+  <pre><span></span><span class="o">(</span><span class="n">xor_ar</span> <span class="n">zip</span> <span class="n">xor_nt</span><span class="o">).</span><span class="n">map</span><span class="o">{</span> <span class="k">case</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">n</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="mf">1.0</span><span class="o">*</span><span class="n">a</span><span class="o">/</span><span class="n">n</span> <span class="o">}.</span><span class="n">sum</span> <span class="o">/</span> <span class="n">xor_ar</span><span class="o">.</span><span class="n">length</span>
+</pre></div>
+
+</div>
+
+<p>which comes out as <strong>~2x.</strong></p>
+
+<hr />
+
+<p>The full source code can be found <a href="https://github.com/billpcs/sdes">on my github page</a>.</p>
+
+<p><strong>Cheers!</strong></p>
+    </div>
+    <footer>
+        <script type="text/javascript">
+          !function(d,s,id){
+              var js,fjs=d.getElementsByTagName(s)[0];
+              if(!d.getElementById(id)){
+                  js=d.createElement(s);
+                  js.id=id;
+                  js.src="//platform.twitter.com/widgets.js";
+                  fjs.parentNode.insertBefore(js,fjs);
+              }
+          }(document,"script","twitter-wjs");
+        </script>
+        <a href="https://twitter.com/share"
+           class="twitter-share-button"
+           data-url="http://billpcs.github.io/2018/03/sdes-in-scala.html"
+           data-dnt="true">
+          "Tweet"</a>
+        <ul class="pager">
+
+        <li class="next">
+          <a href="/2017/05/the-power-of-abstraction.html"><em>The Power Of Abstraction</em> &rarr;</a>
+        </li>
+        </ul>
+    </footer>
+    <hr>
+</article>
+            </div>
+        </div>
+        <footer>
+            <hr />
+            <p>Site generated by <a href="https://github.com/greghendershott/frog">Frog</a>, the <strong>fr</strong>ozen bl<strong>og</strong> tool.</p>
+            <p>Using <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>.</p>
+        </footer>
+    </div>
+    <!-- </body> JS -->
+    <script type="text/javascript" src="/js/jquery-3.2.1.slim.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
