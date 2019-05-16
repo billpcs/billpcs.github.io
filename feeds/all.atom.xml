@@ -4,7 +4,17 @@
  <link rel="self" href="http://billpcs.github.io/feeds/all.atom.xml" />
  <link href="http://billpcs.github.io/index.html" />
  <id>urn:http-billpcs-github-io:-index-html</id>
- <updated>2018-03-25T13:22:29Z</updated>
+ <updated>2019-05-16T17:17:15Z</updated>
+ <entry>
+  <title type="text">An intro to DPDK for mortals</title>
+  <link rel="alternate" href="http://billpcs.github.io/2019/05/an-intro-to-dpdk-for-mortals.html?utm_source=all&amp;utm_medium=Atom" />
+  <id>urn:http-billpcs-github-io:-2019-05-an-intro-to-dpdk-for-mortals-html</id>
+  <published>2019-05-16T17:17:15Z</published>
+  <updated>2019-05-16T17:17:15Z</updated>
+  <author>
+   <name>bill</name></author>
+  <content type="html">
+&lt;p&gt;&lt;em&gt;DPDK can be a bit intimidating even if this is not your first time writing C network code. In this (rather long) post, I aim to offer a step by step introduction to DPDK, from understanding its usefulness, to setting up the environment, to finally writing a small program that uses the library. Take your time with the links, the steps and the commands. Don&amp;rsquo;t overwhelm yourself. See you on the other side!&lt;/em&gt;&lt;/p&gt;&lt;a href="http://billpcs.github.io/2019/05/an-intro-to-dpdk-for-mortals.html?utm_source=all&amp;amp;utm_medium=Atom"&gt;&lt;em&gt;More&amp;hellip;&lt;/em&gt;&lt;/a&gt;</content></entry>
  <entry>
   <title type="text">SDES in Scala</title>
   <link rel="alternate" href="http://billpcs.github.io/2018/03/sdes-in-scala.html?utm_source=all&amp;utm_medium=Atom" />

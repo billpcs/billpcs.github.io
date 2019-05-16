@@ -4,9 +4,17 @@
   <title>The Random Blog: Posts tagged 'ip'</title>
   <description>The Random Blog: Posts tagged 'ip'</description>
   <link>http://billpcs.github.io/tags/ip.html</link>
-  <lastBuildDate>Fri, 16 Dec 2016 15:07:17 UT</lastBuildDate>
-  <pubDate>Fri, 16 Dec 2016 15:07:17 UT</pubDate>
+  <lastBuildDate>Thu, 16 May 2019 17:17:15 UT</lastBuildDate>
+  <pubDate>Thu, 16 May 2019 17:17:15 UT</pubDate>
   <ttl>1800</ttl>
+  <item>
+   <title>An intro to DPDK for mortals</title>
+   <link>http://billpcs.github.io/2019/05/an-intro-to-dpdk-for-mortals.html?utm_source=ip&amp;utm_medium=RSS</link>
+   <guid isPermaLink="false">urn:http-billpcs-github-io:-2019-05-an-intro-to-dpdk-for-mortals-html</guid>
+   <pubDate>Thu, 16 May 2019 17:17:15 UT</pubDate>
+   <author>bill</author>
+   <description>
+&lt;p&gt;&lt;em&gt;DPDK can be a bit intimidating even if this is not your first time writing C network code. In this (rather long) post, I aim to offer a step by step introduction to DPDK, from understanding its usefulness, to setting up the environment, to finally writing a small program that uses the library. Take your time with the links, the steps and the commands. Don&amp;rsquo;t overwhelm yourself. See you on the other side!&lt;/em&gt;&lt;/p&gt;&lt;a href="http://billpcs.github.io/2019/05/an-intro-to-dpdk-for-mortals.html?utm_source=ip&amp;amp;utm_medium=RSS"&gt;&lt;em&gt;More&amp;hellip;&lt;/em&gt;&lt;/a&gt;</description></item>
   <item>
    <title>The first blog post</title>
    <link>http://billpcs.github.io/2016/12/the-first-blog-post.html?utm_source=ip&amp;utm_medium=RSS</link>

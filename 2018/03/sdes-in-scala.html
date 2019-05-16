@@ -10,7 +10,7 @@
     <meta name="keywords" content="scala, cryptography">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/favicon.ico">
-    <link rel="canonical" href="http://billpcs.github.io/2018/03/sdes-in-scala.html"> <link rel="next" href="/2017/05/the-power-of-abstraction.html"> 
+    <link rel="canonical" href="http://billpcs.github.io/2018/03/sdes-in-scala.html"> <link rel="next" href="/2017/05/the-power-of-abstraction.html"> <link rel="prev" href="/2019/04/an-intro-to-dpdk-for-mortals.html">
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/css/pygments.css">
@@ -50,7 +50,7 @@
                   </a>
 
                   <div class="dropdown-menu">
-                    <a class="dropdown-item" href="/tags/cryptography.html">cryptography</a><a class="dropdown-item" href="/tags/ip.html">ip</a><a class="dropdown-item" href="/tags/python.html">python</a><a class="dropdown-item" href="/tags/scala.html">scala</a><a class="dropdown-item" href="/tags/theory.html">theory</a>
+                    <a class="dropdown-item" href="/tags/c.html">c</a><a class="dropdown-item" href="/tags/cryptography.html">cryptography</a><a class="dropdown-item" href="/tags/dpdk.html">dpdk</a><a class="dropdown-item" href="/tags/ip.html">ip</a><a class="dropdown-item" href="/tags/python.html">python</a><a class="dropdown-item" href="/tags/scala.html">scala</a><a class="dropdown-item" href="/tags/theory.html">theory</a>
                   </div>
                 </li>
 
@@ -117,7 +117,7 @@
 
 <h3 id="my-solution">My Solution</h3>
 
-<p>So, after noting these two problems, I started thinking about a different solution. In order for <code>xor</code> operations to execute in almost constant time, we could have <strong>the whole binary number saved in a Short integer</strong>. In this way the operation can be done in one go. With a single <code>^</code> we can have the result of what previously we created a O(n) function for. A <code>Short</code> can be 16bits, which means we can save the 4, 8 and 10 bit numbers we need, in a single <em>Short</em>. With this approach we kill two birds with one stone, as we also solve the problem of using too much memory. Let&rsquo;s see why.</p>
+<p>So, after noting these two problems, I started thinking about a different solution. In order for <code>xor</code> operations to execute in almost constant time, we could have <strong>the whole binary number saved in a Short integer</strong>. In this way the operation can be done in one go. With a single <code>^</code> we can have the result of what previously we created a O(n) function for. A <code>Short</code> can be 16 bits, which means we can save the 4, 8 and 10 bit numbers we need, in a single <em>Short</em>. With this approach we kill two birds with one stone, as we also solve the problem of using too much memory. Let&rsquo;s see why.</p>
 
 <h4 id="memory">Memory</h4>
 
@@ -125,7 +125,7 @@
 
 <p>In the case of the <code>Array[Byte]</code> we would have 4 elements, each with a size of a <code>Byte</code> meaning 4*8 = 32 bits.</p>
 
-<p>In the second case we would use a Short to store the 4bit number, meaning 16 bits.</p>
+<p>In the second case we would use a <code>Short</code> to store the 4bit number, meaning 16 bits.</p>
 
 <p>In the case of 10bit numbers, the first way yields <em>80 bits</em> and the second stays the same: 16 bits. We can thus see, that even in the worst case, the second way uses less memory.</p>
 
@@ -162,7 +162,7 @@
 
 </div>
 
-<p>But this is wrong! We only want the 4 LSB of the value <code>v</code> to be accounted for in the result. By doing this we get values greater than the range a 4 bit number could have. Since numbers are represented in <code>two's complement</code> format, the range for 4 bits is [&ndash;8 to 7]. So, how can we solve this problem?</p>
+<p>But this is wrong! We only want the 4 LSB of the value <code>v</code> to be accounted for in the result. By doing this we get values greater than the range a 4 bit number could have. Since numbers are represented in <code>two's complement</code> format, the range for 4 bits should be [&ndash;8 to 7]. So, how can we solve this problem?</p>
 
 <h5 id="bit-masks-to-the-rescue">Bit masks to the rescue!</h5>
 
@@ -342,7 +342,9 @@
            data-dnt="true">
           "Tweet"</a>
         <ul class="pager">
-
+        <li class="previous">
+          <a href="/2019/04/an-intro-to-dpdk-for-mortals.html">&larr; <em>An intro to DPDK for mortals</em></a>
+        </li>
         <li class="next">
           <a href="/2017/05/the-power-of-abstraction.html"><em>The Power Of Abstraction</em> &rarr;</a>
         </li>

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <title>An intro to DPDK for mortals</title>
+    <meta name="description" content="_DPDK can be a bit intimidating even if this is not your first time writing C network code. In this (rather long) post, I aim to offer a step by step introduction to DPDK, from understanding its usefulness, to setting up the environment, to finally writin...">
+    <meta name="author" content="bill">
+    <meta name="keywords" content="dpdk, c, ip">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="canonical" href="http://billpcs.github.io/2019/05/an-intro-to-dpdk-for-mortals.html"> <link rel="next" href="/2018/03/sdes-in-scala.html"> 
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/pygments.css">
+    <!-- Feeds -->
+    <link rel="alternate" type="application/rss+xml" href="/feeds/all.rss.xml" title="RSS Feed">
+    <!-- JS -->
+    <script type="text/javascript">
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-xxxxx', 'auto');
+      ga('send', 'pageview');
+    </script>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand"> { The Random Blog } </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation" style="">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarColor02">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/index.html"> Home </a>
+                </li>
+
+
+
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" data-toggle="dropdown">
+                    Tags <b class="caret"></b>
+                  </a>
+
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/tags/c.html">c</a><a class="dropdown-item" href="/tags/cryptography.html">cryptography</a><a class="dropdown-item" href="/tags/dpdk.html">dpdk</a><a class="dropdown-item" href="/tags/ip.html">ip</a><a class="dropdown-item" href="/tags/python.html">python</a><a class="dropdown-item" href="/tags/scala.html">scala</a><a class="dropdown-item" href="/tags/theory.html">theory</a>
+                  </div>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/feeds/all.rss.xml">RSS</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/About.html">About</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+
+            <!-- Main column -->
+            <div id="content" class="col-md-12">
+                     <article>
+    <div class="jumbotron">
+        <header>
+            <h1>An intro to DPDK for mortals</h1>
+            <p class='date-and-tags text-success'>
+<time datetime="2019-05-16" pubdate="true">2019-05-16</time> // <span class="tags"><a href="/tags/dpdk.html">dpdk</a>, <a href="/tags/c.html">c</a>, <a href="/tags/ip.html">ip</a></span></p>
+            <p class='authors text-info'>By: <span class="authors">bill</span></p>
+        </header>
+
+<p><em>DPDK can be a bit intimidating even if this is not your first time writing C network code. In this (rather long) post, I aim to offer a step by step introduction to DPDK, from understanding its usefulness, to setting up the environment, to finally writing a small program that uses the library. Take your time with the links, the steps and the commands. Don&rsquo;t overwhelm yourself. See you on the other side!</em></p>
+<!-- more-->
+
+<h2 id="motivation">Motivation</h2>
+
+<p>Sometimes you just want to process packets at line rate. This means you need to process about <a href="https://www.netgate.com/blog/further-a-roadmap-for-pfsense.html">14Mpps on a 10Gbps interface</a>. A standard GNU/Linux setup can reach a throughput of <a href="https://blog.cloudflare.com/how-to-receive-a-million-packets/">about 1Mpps</a>. Of course, even 1Mpps is amazingly more packets per second than any one user can know what to do with. Such rates are mostly needed for specialized applications that are running on general purpose computers. But why would one want to do such a thing? Why not buy an embedded black-box enterprise solution, a thingy that is made with low-level stuff (maybe ASICs, FPGAs, native C code) and instead introduce all those layers of abstractions with operating systems and the like?</p>
+
+<p>It&rsquo;s true, such low-level solutions still exist. However there is also a new approach in network architectures called Network Function Virtualization commonly seen as NFV. The idea is that instead of this &lsquo;specialized thingy&rsquo; (<a href="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Cisco_small_business_SG300-28_28-port_Gigabit_Ethernet_rackmount_switch.jpg/800px-Cisco_small_business_SG300-28_28-port_Gigabit_Ethernet_rackmount_switch.jpg">like this one</a>) you instead use a general purpose computer (<a href="https://upload.wikimedia.org/wikipedia/commons/8/85/Macpro.png">like this one</a>). What&rsquo;s good with such a computer is that everything can be virtual. You can spawn OSs, switches, even whole LANs, all inside this server. You can even interconnect many such computers and make even more intricate topologies and operations. When one virtual network is no longer needed you can just shut it down. The empty &lsquo;space&rsquo; left can be covered by an other process that needs to run instead of being wasted. Let alone being able to edit the source code to your needs, make security fixes or develop new features. Of course there is much more to NFV. You can start from <a href="https://en.wikipedia.org/wiki/Network_function_virtualization">wikipedia</a> or <a href="https://www.sdxcentral.com/networking/nfv/definitions/whats-network-functions-virtualization-nfv/">sdxcentral</a> if you are so inclined.</p>
+
+<p>This post is going to be a guide through the setup of such Virtual Network Function all inside your computer, with the help of DPDK of course.</p>
+
+<h2 id="what-is-dpdk">What is DPDK?</h2>
+
+<p>I suppose that if you are reading this you are somewhat familiar with DPDK. However, I can try to give my take on it. If I had to describe DPDK in the simplest fashion I would say this: It is a library written in C that bypasses the kernel, brings the packets to the userspace and offers efficient ways to manipulate them. It preallocates memory (no <code>malloc</code>s during runtime), it polls the NIC instead of using interrupts and uses efficient data structures.</p>
+
+<h2 id="what-you-will-need">What you will need</h2>
+
+<ul>
+ <li>A computer with enough RAM (let&rsquo;s say 4GB?) and some kind of GNU/Linux</li>
+ <li>Oracle VM VirtualBox</li>
+ <li>Open vSwitch</li>
+ <li>DPDK</li>
+ <li>Fast access to your debugging hat</li></ul>
+
+<h2 id="the-main-idea">The main idea</h2>
+
+<p>Here is what we are going to do: Have your computer spawn a virtual switch which will in turn interconnect three different virtual machines running on VirtualBox, one of which will be the VNF. Here is a picture:</p>
+
+<p><img src="../../img/overview-2019.svg" style="border-radius: 2%;display: block;margin-left: auto;margin-right: auto;width: 45%;" /></p>
+
+<p>The problem is this: Alice and Bob like to send files and messages to each other. However Eve, the evil user of Proxy has configured the switch in such a way that it forwards any packet received to herself too! Now that all packets reach the Proxy, Eve has one final and crucial mission: To build a fast packet capture program, to log everything of interest. Naturally, she has asked for our help, which we will of course happily provide (she doesn&rsquo;t know of <code>tcpdump</code>, shhh&hellip;)</p>
+
+<p>But why is this a VNF? Well because, to put it simply, we can bundle it in a standalone image, and whenever we need a fast packet capturer, boot it with the correct configuration and let everything take care of itself. If the traffic becomes too big for one instance of the packet capturer, we could always make more copies and deploy them accordingly.</p>
+
+<p>This is one of the simplest VNFs one can build. More challenging ones include Deep Packet Inspection VNFs, firewall VNFs, or load balancing VNFs. In all these cases one generally looks in the packet contents to decide what to do with a packet. Drop it? Forward it? Log it? Respond with a certain message to the sender?</p>
+
+<h2 id="setting-up-alice-and-bob">Setting up Alice and Bob</h2>
+
+<p>We can start by giving Alice and Bob two computers to communicate.</p>
+
+<p>To do this, first install <a href="https://www.virtualbox.org/">VirtualBox</a> in some way. This is going to be the place Alice and Bob (and of course later the Proxy) will live. Then, we have to choose an OS for them. I used <a href="https://www.ubuntu.com/download/server">Ubuntu Server</a>. There is no need for a graphical interface. Let&rsquo;s keep it lightweight. After all, we will be spawning three different Virtual Machines.</p>
+
+<p>At the time of writing 18.04 is the latest LTS release and this is what I am going to install. I will then create the first two virtual machines, one called Alice and one called Bob (you can also create the Proxy too, but we will not be using it for now). I used <code>alice</code> and <code>bob</code> as names for the first and the second VM respectively for every name field that was requested. Any configuration I do from now on applies to all the VMs -in cases it does not, I will explicitly say so.</p>
+
+<p>When you first install a Virtual Machine on VirtualBox its network is automatically configured to NAT, as it is a good default. It allows you to have connectivity to &lsquo;the outside world&rsquo; in order to install updates, surf the Internet, etc. However, you can also surf the Internet in a different way, using a <strong>Bridged Adapter</strong> and binding it to your wireless or wired interface. This mode is the one we will be using. You can check out what this and the other networking modes mean <a href="https://www.virtualbox.org/manual/ch06.html#networkingmodes">here</a> and <a href="https://blogs.oracle.com/scoter/networking-in-virtualbox-v2">here</a>. Don&rsquo;t be afraid to become familiar with them if you aren&rsquo;t already!</p>
+
+<p>For our purposes, we will need two interfaces, so enable the first two adapters. <strong>The first one will be used for building our DPDK network and testing our program and the second one in order to have connectivity to the Internet.</strong> Make the first one <strong>Not Attached</strong> (because we haven&rsquo;t created our DPDK network yet) and the second one <strong>Bridged</strong> to your wired or wireless interface (this one is hopefully already there). After you have enabled these two adapters, go ahead and boot the two virtual machines.</p>
+
+<p>By using <em>Bridged Networking</em> on the second adapter, we create a small network in which the <em>host</em> (your laptop or your PC) and all the VMs are visible to each other, as if they are in the same subnet. As a first step, we can check that Alice and Bob can send packets to each other. We can test this by making a simple <code>nmap</code> scan in our local network. Alice and Bob should show up. Something in the lines of <code>nmap -F 192.168.1.1/24</code> should work, adjusting the notation for your own network. This is the output for me</p>
+
+<pre><code>Starting Nmap 7.01 ( https://nmap.org ) at 2019-03-07 19:49 EET
+Nmap scan report for gtw (192.168.1.1)
+Host is up (0.029s latency).
+Not shown: 97 closed ports
+PORT    STATE SERVICE
+53/tcp  open  domain
+80/tcp  open  http
+443/tcp open  https
+
+Nmap scan report for ngt (192.168.1.5)
+Host is up (0.00032s latency).
+Not shown: 99 closed ports
+PORT   STATE SERVICE
+22/tcp open  ssh
+
+Nmap scan report for alice (192.168.1.16)
+Host is up (0.068s latency).
+Not shown: 99 closed ports
+PORT   STATE SERVICE
+22/tcp open  ssh
+
+Nmap scan report for bob (192.168.1.17)
+Host is up (0.068s latency).
+Not shown: 99 closed ports
+PORT   STATE SERVICE
+22/tcp open  ssh
+
+Nmap done: 256 IP addresses (4 hosts up) scanned in 3.15 seconds</code></pre>
+
+<p>We can see that both <code>alice</code> and <code>bob</code> are up. The other two machines are the default gateway (<code>gtw</code>) and the host (<code>ngt</code>). There are many other tests you can run. For example test if the two machines (<code>alice</code> and <code>bob</code>) can ping each other.</p>
+
+<p>In order to make your life easier for what is to follow, you should edit the <code>/etc/network/interfaces</code> file for each machine. Here is what is should look like:</p>
+
+<div class="brush: bash">
+ <div class="source">
+  <pre><span></span><span class="c1"># The loopback network interface</span>
+auto lo
+iface lo inet loopback
+
+<span class="c1"># The dpdk-looking interface</span>
+auto enp0s3
+allow-hotplug enp0s3
+iface enp0s3 inet static
+        address 172.16.1.22
+        netmask 255.255.255.0
+
+<span class="c1"># The internet-looking interface</span>
+auto enp0s8
+allow-hotplug enp0s8
+iface enp0s8 inet dhcp        
+</pre></div>
+
+</div>
+
+<p>There is a non-zero chance that the names of the interfaces will differ in your case. Change them accordingly. (<code>ip link show</code> may help to find out their names). This configuration will tell the first adapter (<code>enp0s3</code>, the one we will use for DPDK) to have a static IP. Notice that we can choose whatever we like as an IP for this interface because the network created with <code>enp0s3</code> will be local and cut out from the rest of the world. You could have thus chosen anything, for example <code>122.122.122.122</code> or <code>10.12.13.14</code>. It doesn&rsquo;t matter (as long as you set the subnet mask correctly). This configuration will also tell your second network adapter (<code>enp0s8</code>, the one bridged with your computer&rsquo;s interface) to request an IP using DHCP. In this way every time you boot the VM, the interfaces will automatically be assigend IP&rsquo;s.</p>
+
+<pre><code>Note:
+  Don't forget to apply this configuration to both machines
+  (they should however have different static IP's, I chose 172.16.1.11 and 172.16.1.22)</code></pre>
+
+<h2 id="installing-openssh-server-optional">Installing openssh-server (optional)</h2>
+
+<p>Because I find having to work with terminal environments in VirtualBox cumbersome, I prefer to install openssh-server and connect to every VM from my terminal. It is very simple to do if you want to:</p>
+
+<div class="brush: sh">
+ <div class="source">
+  <pre><span></span><span class="c1"># in your VM (e.g alice)</span>
+$ sudo apt install openssh-server
+
+<span class="c1"># in your host, to connect to alice (IP may differ)</span>
+$ ssh alice@192.168.1.16
+</pre></div>
+
+</div>
+
+<div class="brush: sh">
+ <div class="source">
+  <pre><span></span><span class="c1"># and now you can do everything from here!</span>
+Last login: Thu May <span class="m">16</span> 16:38:46 2019
+alice@alice:~$
+</pre></div>
+
+</div>
+
+<h2 id="setting-up-the-switch">Setting up the switch</h2>
+
+<p>We can continue our journey by simply introducing the switch to the equation (before it becomes evil and starts sending packets here and there). Up to now Alice and Bob were connected through their second adapter, with Virtual Box playing the role of the switch. Now we will add our own switch and create a second network using the first adapter. It&rsquo;s something like your computer having two NICs and connecting to two different networks simultaneously. But with the virtual adapters VirtualBox offers, we can do it with no cost at all. Isn&rsquo;t the virtual space beautiful?</p>
+
+<p>As you may have guessed we will use Open vSwitch. Let&rsquo;s install it first. On Ubuntu based distributions this is done like so:</p>
+
+<div class="brush: bash">
+ <div class="source">
+  <pre><span></span>sudo apt install openvswitch-switch
+</pre></div>
+
+</div>
+
+<p>but on other distributions you may have to use another package manager. You can consider installing from source too! (more info <a href="http://www.openvswitch.org/">here</a>)</p>
+
+<p>When this is done, go ahead and start the ovs deamon</p>
+
+<pre><code>sudo /usr/local/share/openvswitch/scripts/ovs-ctl start</code></pre>
+
+<p>(the path may vary depending on the way you installed ovs)</p>
+
+<p>this should output something like the following:</p>
+
+<pre><code> * Starting ovsdb-server
+ * system ID not configured, please use --system-id
+ * Configuring Open vSwitch system IDs
+ * Inserting openvswitch module
+ * Starting ovs-vswitchd
+ * Enabling remote OVSDB managers</code></pre>
+
+<p>You know what this means? That your computer is now a <em>habitable</em> environment for a switch!</p>
+
+<p>Two are the basic command line tools that we are going to use. <code>ovs-vsctl</code> and <code>ovs-ofctl</code>. <code>vsctl</code> stands for VSwitchd ConTroL and as such it is mainly concerned with querying and modifying the OvS database. On the other hand <code>ovs-ofctl</code> stands for OpenFlow ConTroL. From here we can create rules for our switches or see their current status. Anything relating to OpenFlow really.</p>
+
+<ul>
+ <li>Let&rsquo;s start by creating a bridge. It&rsquo;s as simple as that:</li></ul>
+
+<div class="brush: bash">
+ <div class="source">
+  <pre><span></span> sudo ovs-vsctl add-br br0
+</pre></div>
+
+</div>
+
+<ul>
+ <li>Then create two TAP (<a href="https://www.saminiir.com/openvpn-puts-packets-inside-your-packets/#tuntap-devices">link here</a>) interfaces, one for Alice and one for Bob</li></ul>
+
+<div class="brush: bash">
+ <div class="source">
+  <pre><span></span>sudo ip tuntap add mode tap vnet-alice
+sudo ip tuntap add mode tap vnet-bob
+</pre></div>
+
+</div>
+
+<ul>
+ <li>Bring them up</li></ul>
+
+<div class="brush: bash">
+ <div class="source">
+  <pre><span></span>sudo ip link <span class="nb">set</span> vnet-alice up
+sudo ip link <span class="nb">set</span> vnet-bob up
+</pre></div>
+
+</div>
+
+<ul>
+ <li>And then add them to the bridge <code>br0</code> as ports</li></ul>
+
+<div class="brush: bash">
+ <div class="source">
+  <pre><span></span>sudo ovs-vsctl add-port br0 vnet-alice
+sudo ovs-vsctl add-port br0 vnet-bob
+</pre></div>
+
+</div>
+
+<p>So here is what we essentially get with the above configuration:</p>
+
+<p><img src="../../img/bridge-2-2019.svg" style="border-radius: 2%;display: block;margin-left: auto;margin-right: auto;width: 20%;" /></p>
+
+<p>Those two colored boxes are ports. If this was a real bridge and not a virtual one you could really get your Ethernet cables from each PC and stick each one to the respective port (just like you do when you connect your computer to your home router via Ethernet). Now these cables are virtual too, so we do this &ldquo;sticking&rdquo; through the VirtualBox GUI.</p>
+
+<p>You can now boot the machines with the first Adapter&rsquo;s &lsquo;Attached to&rsquo; set to <strong>Bridged Adapter</strong> (the one we left &ldquo;Not Attached&rdquo; earlier) and the &lsquo;Name&rsquo; set to <code>vnet-alice</code> and <code>vnet-bob</code> accordingly. Due to the configuration we did earlier in <code>/etc/network/interfaces</code> the ports will be assigned IPs. This means that we can get the two machines communicating again, this time over OvS and not over VirtualBox.</p>
+
+<p>To put it differently, now <code>alice</code> and <code>bob</code> can communicate through two distinct routes:</p>
+
+<ul>
+ <li>The first one is through your local subnet (in our case <code>192.168.1.1/24</code>)</li>
+ <li>And the second one is through the subnet we just created, bridged with OvS (in our case <code>172.16.1.1/24</code>)</li></ul>
+
+<p>(To verify this, try to see that both <code>ping 192.168.1.X</code> and <code>ping 172.16.1.X</code> work, replacing X with a valid IP for each subnet)</p>
+
+<p>The same shown as an image:</p>
+
+<p><img src="../../img/whole-network-view-simplest.svg" style="border-radius: 2%;display: block;margin-left: auto;margin-right: auto;width: 60%;" /></p>
+
+<h2 id="making-the-switch-evil">Making the switch evil</h2>
+
+<p>If you haven&rsquo;t created the third and last VM, now is the time! Let&rsquo;s create the Proxy, the place our DPDK code will run on.</p>
+
+<p>Just create the VM and do the respective configuration we did on Alice and Bob. Here is a quick recap:</p>
+
+<p>On the host:</p>
+
+<div class="brush: bash">
+ <div class="source">
+  <pre><span></span>sudo ip tuntap add mode tap vnet-proxy
+sudo ip link <span class="nb">set</span> vnet-proxy up
+sudo ovs-vsctl add-port br0 vnet-proxy
+</pre></div>
+
+</div>
+
+<p>On the VM:</p>
+
+<div class="brush: bash">
+ <div class="source">
+  <pre><span></span><span class="c1"># edit /etc/network/interfaces</span>
+
+<span class="c1"># The loopback network interface</span>
+auto lo
+iface lo inet loopback
+
+<span class="c1"># The dpdk-looking interface</span>
+auto enp0s3
+allow-hotplug enp0s3
+iface enp0s3 inet static
+        address 172.16.1.66
+        netmask 255.255.255.0
+
+<span class="c1"># The internet-looking interface</span>
+auto enp0s8
+allow-hotplug enp0s8
+iface enp0s8 inet dhcp        
+</pre></div>
+
+</div>
+
+<p>On the Proxy Virtual Box Network Settings, set the first adapter to connect to <code>vnet-proxy</code> and the second one to your network, just like we did before.</p>
+
+<p><strong>Also, it is very important to set the Promiscuous mode to <em>Allow all</em> or else VirtualBox will drop the packets not destined for Proxy (which we of course don&rsquo;t like)</strong></p>
+
+<p>To see some more information on the bridge and its various ports we can issue the command</p>
+
+<div class="brush: bash">
+ <div class="source">
+  <pre><span></span>sudo ovs-ofctl show br0
+</pre></div>
+
+</div>
+
+<p>in my case the output is</p>
+
+<pre><code>OFPT_FEATURES_REPLY (xid=0x2): dpid:00005e6ae5a0cd4e
+n_tables:254, n_buffers:0
+capabilities: FLOW_STATS TABLE_STATS PORT_STATS QUEUE_STATS ARP_MATCH_IP
+actions: output enqueue set_vlan_vid set_vlan_pcp strip_vlan mod_dl_src
+        mod_dl_dst mod_nw_src mod_nw_dst mod_nw_tos mod_tp_src mod_tp_dst
+ 1(vnet-alice): addr:16:98:bf:30:4d:aa
+     config:     0
+     state:      LINK_DOWN
+     current:    10MB-FD COPPER
+     speed: 10 Mbps now, 0 Mbps max
+ 2(vnet-bob): addr:32:1b:e4:76:a8:5b
+     config:     0
+     state:      LINK_DOWN
+     current:    10MB-FD COPPER
+     speed: 10 Mbps now, 0 Mbps max
+ 3(vnet-proxy): addr:1e:73:60:93:58:64
+     config:     0
+     state:      LINK_DOWN
+     current:    10MB-FD COPPER
+     speed: 10 Mbps now, 0 Mbps max
+ LOCAL(br0): addr:5e:6a:e5:a0:cd:4e
+     config:     PORT_DOWN
+     state:      LINK_DOWN
+     speed: 0 Mbps now, 0 Mbps max
+OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0</code></pre>
+
+<p>Thus <code>port 1</code> is Alice, <code>port 2</code> is Bob and <code>port 3</code> is the Proxy. It may be different in your case but it won&rsquo;t matter. Here is the updated view of our bridge:</p>
+
+<p><img src="../../img/bridge-2019.svg" style="border-radius: 2%;display: block;margin-left: auto;margin-right: auto;width: 30%;" /></p>
+
+<p>Now it&rsquo;s time for the <code>br0</code> to become evil. For it to be evil, it has to have a way to forward packets to PC-Proxy when they conform to certain criteria.</p>
+
+<p>Let&rsquo;s add some rules then. These rules will modify the switch in such a way that every packet will reach Proxy too.</p>
+
+<div class="brush: bash">
+ <div class="source">
+  <pre><span></span><span class="c1"># delete old rules</span>
+sudo ovs-ofctl del-flows br0
+<span class="c1"># anything sent to Alice must be forwarded to both vnet-proxy and vnet-alice</span>
+sudo ovs-ofctl add-flow br0 <span class="nv">in_port</span><span class="o">=</span><span class="s2">"vnet-alice"</span>,actions<span class="o">=</span>output:<span class="s2">"vnet-proxy"</span>,normal
+<span class="c1"># anything sent to Bob must be forwarded to both vnet-proxy and vnet-bob</span>
+sudo ovs-ofctl add-flow br0 <span class="nv">in_port</span><span class="o">=</span><span class="s2">"vnet-bob"</span>,actions<span class="o">=</span>output:<span class="s2">"vnet-proxy"</span>,normal
+</pre></div>
+
+</div>
+
+<h2 id="dpdk-to-the-rescue">DPDK to the rescue</h2>
+
+<p>It&rsquo;s about time we did some coding. The switch is sending us the packets Alice and Bob are exchanging but we have no way yet to see them! (well, excluding <code>tcpdum</code> :P). We will now build our simple packet capture utility using DPDK. It won&rsquo;t be elaborate at all, however, if you are anything like me when I first used DPDK, it could be your first time writing C programs to capture real traffic! And this is amazing.</p>
+
+<p>We will now get the dpdk sources, compile the project and modify our network card so that we can run dpdk code on it. For this, boot PC-Proxy and issue these commands.</p>
+
+<div class="brush: bash">
+ <div class="source">
+  <pre><span></span>sudo apt install -y make gcc libnuma-dev build-essential python pkg-config
+
+wget https://fast.dpdk.org/rel/dpdk-18.05.1.tar.xz
+
+tar xf dpdk-18.05.1.tar.xz
+
+mv dpdk-stable-18.05.1 dpdk
+</pre></div>
+
+</div>
+
+<p>There are a few more steps before we can really start the development cycle. We have to set up everything the way DPDK wants it to be in order to work. Luckily, DPDK has bundled in some useful scripts so that we don&rsquo;t have to reinvent the wheel. Navigate to <code>dpdk/usertools/</code> and look for the file called <code>dpdk-setup.py</code>. The name of the file does not lie, it will indeed help us set it up.</p>
+
+<pre><code>Tip:
+  Here are some useful commands for when using the shell:
+  Ctrl-A brings you to the beginning of the line
+  Ctrl-E brings you to the end of the line
+  Ctrl-U deletes everything you have written in the line</code></pre>
+
+<p>Before executing it, first bring down the interface you decided to give to DPDK. DPDK will take over it now. In my case, I used this command:</p>
+
+<pre><code>sudo ifconfig enp0s3 down</code></pre>
+
+<p>Now we are ready to run <code>dpdk-setup.py</code>. When you first run the script you will be met with a looong list of available operations. However only some are relevant to us.</p>
+
+<pre><code>Tip:
+  Shift - (PgUp/PgDn) is your friend (or Ctrl-Shift, depending on the terminal)</code></pre>
+
+<ol>
+ <li><strong>Compile</strong> (I use No. <code>15</code>, x86_64 with gcc)</li>
+ <li><strong>Insert the driver</strong> (I use No. <code>18</code>, igb_uio)</li>
+ <li><strong>Create hugepages for non-NUMA systems</strong> (No. <code>21</code>, 64 should be fine)</li>
+ <li><strong>Bind the network interface to dpdk</strong> (No. <code>24</code> aaaand &hellip; dpdk takes over the network interface!)</li></ol>
+
+<p>Aaahhh, at last. We can write some code</p>
+
+<h2 id="developing-the-packet-capture">Developing the packet capture</h2>
+
+<p>The <em>skeleton</em> of our development endeavors is going to be a file dpdk offers bundled with the library under the <code>examples/</code>. It is a <em>bear bones</em> application that has some annoying things already taken care of so that we can focus on developing the logic. I don&rsquo;t know if you took the hint but the file we are interested in is indeed under <code>skeleton/</code>. It is called basicfwd.c and it has a very very simple dpdk application. I like this file because it deals with all the initialization stuff so that we don&rsquo;t have to mess with them yet, and also leaves enough space to make small changes and observe the outcome.</p>
+
+<p>This program does some things that we don&rsquo;t want it to do. So first of, we are going to remove some unnecessary code and then insert our own. What this program does essentially, is to receive frames in one port and forward them in a second one. We, however, only want to receive packets and maybe print them to the screen. Nothing more. So there are a couple of places even the <em>skeleton</em> contains too much for our purposes. There is still some code that we will have to remove. Then we add our own.</p>
+
+<p>The whole file is just three functions, <code>port_init()</code>, <code>lcore_main()</code> and <code>main()</code>. <code>port_init()</code> we don&rsquo;t even care about. We pray it does what it claims it does correctly and move on. The <code>main()</code> function we only care about slightly, to the extend that we can see the general structure of the program; initialize this, take that, call the other function etc. Our changes will be focused on <code>lcore_main()</code>. A function that essentially is called and then runs forever.</p>
+
+<p>It is during this function call that packets are &ldquo;received&rdquo; and can be &ldquo;sent&rdquo;. On of the ways DPDK can take data from the wire is the function <code>rte_eth_rx_burst()</code> which when called fills in a buffer of packets. The buffer can be thought of as a chunk of memory where the packets reside after the call. It returns the number of packets that where eventually received. So then <code>buf[0]</code> is the first packet, <code>buf[1]</code> is the second, and so on. This buffer except for the data that were indeed in the wire, contains some metadata. So in order to reach the point the real data is, we can use a function DPDK conveniently provides just for this purpose. This is <code>rte_pktmbuf_mtod</code>. Here is how it works</p>
+
+<div class="brush: c">
+ <div class="source">
+  <pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;rte_ip.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;rte_tcp.h&gt;</span><span class="cp"></span>
+
+<span class="c1">// fill in the buffer</span>
+<span class="k">const</span> <span class="kt">uint16_t</span> <span class="n">nb_rx</span> <span class="o">=</span> <span class="n">rte_eth_rx_burst</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bufs</span><span class="p">,</span> <span class="n">BURST_SIZE</span><span class="p">);</span>
+<span class="c1">// now bufs is an array (of length nb_rx) of packets together with their metadata</span>
+
+<span class="c1">// take the first packet and make eth point to the start of the Ethernet frame</span>
+<span class="k">struct</span> <span class="n">ether_hdr</span> <span class="o">*</span><span class="n">eth</span> <span class="o">=</span> <span class="n">rte_pktmbuf_mtod</span><span class="p">(</span><span class="n">bufs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="k">struct</span> <span class="n">ether_hdr</span><span class="o">*</span><span class="p">);</span>
+
+<span class="c1">// to reach the ip header, it is much simpler, just some pointer arithmetic</span>
+<span class="k">struct</span> <span class="n">ipv4_hdr</span> <span class="o">*</span><span class="n">ip</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">ipv4_hdr</span><span class="o">*</span><span class="p">)(</span><span class="n">eth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+
+<span class="c1">// the same to reach the tcp header</span>
+<span class="k">struct</span> <span class="n">tcp_hdr</span> <span class="o">*</span><span class="n">tcp</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">tcp_hdr</span><span class="o">*</span><span class="p">)(</span><span class="n">ip</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</pre></div>
+
+</div>
+
+<p>Now that we know how to get hold of the packets, let&rsquo;s start editing.</p>
+
+<h3 id="remove-the-even-port-check">Remove: the &lsquo;even port&rsquo; check</h3>
+
+<p>For our purposes we don&rsquo;t care if the number of available ports is even or odd. We just need one! The one port that receives the packets. So remove</p>
+
+<div class="brush: c">
+ <div class="source">
+  <pre><span></span><span class="k">if</span> <span class="p">(</span><span class="n">nb_ports</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">||</span> <span class="p">(</span><span class="n">nb_ports</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">rte_exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span> <span class="s">"Error: number of ports must be even</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+</pre></div>
+
+</div>
+
+<h3 id="remove-the-txburst">Remove: the &lsquo;tx_burst&rsquo;</h3>
+
+<p>We don&rsquo;t want to send anything, we just want to capture packets. (You could however, and wreck havoc on your network. You would essentially duplicate each received frame). So remove</p>
+
+<div class="brush: c">
+ <div class="source">
+  <pre><span></span><span class="cm">/* Send burst of TX packets, to second port of pair. */</span>
+<span class="k">const</span> <span class="kt">uint16_t</span> <span class="n">nb_tx</span> <span class="o">=</span> <span class="n">rte_eth_tx_burst</span><span class="p">(</span><span class="n">port</span> <span class="o">^</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bufs</span><span class="p">,</span> <span class="n">nb_rx</span><span class="p">);</span>
+</pre></div>
+
+</div>
+
+<pre><code>Note:
+  In network code, TX is used to mean Transmit and RX to mean Receive</code></pre>
+
+<h3 id="remove-the-if-tx--rx-check">Remove: the &lsquo;if tx &lt; rx&rsquo; check</h3>
+
+<p>A check is made like to see if some packets were not transmitted, and if it is true free them. Given that this will always be the case in our example, there is no need to test for it. (we only remove the outer <code>if</code>, we still want to free the buffers in the <code>for</code> loop)</p>
+
+<div class="brush: c">
+ <div class="source">
+  <pre><span></span><span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="n">nb_tx</span> <span class="o">&lt;</span> <span class="n">nb_rx</span><span class="p">))</span> <span class="p">{</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+
+<p>At this point we are free to write our code.</p>
+
+<h3 id="add-the-print-mac-address-function">Add: the &lsquo;print MAC address&rsquo; function</h3>
+
+<p>Usually my first step in writing code is to create function that will give some visual queues to see if everything is normal. In this case my first step was to create a function to print the a MAC address. When I receive a packet I send the Source and Destination MAC address to this function. That way I can clearly see if I am getting the frames I am supposed to when executing the program. After all, what is a packet capturing utility without seeing some MAC addresses?</p>
+
+<div class="brush: c">
+ <div class="source">
+  <pre><span></span><span class="kt">void</span> <span class="nf">print_mac</span><span class="p">(</span><span class="k">struct</span> <span class="n">ether_addr</span> <span class="n">addr</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\t</span><span class="s">%02"</span> <span class="n">PRIx8</span> <span class="s">" %02"</span> <span class="n">PRIx8</span> <span class="s">" %02"</span> <span class="n">PRIx8</span>
+               <span class="s">" %02"</span> <span class="n">PRIx8</span> <span class="s">" %02"</span> <span class="n">PRIx8</span> <span class="s">" %02"</span> <span class="n">PRIx8</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+            <span class="n">addr</span><span class="p">.</span><span class="n">addr_bytes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">addr</span><span class="p">.</span><span class="n">addr_bytes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">addr</span><span class="p">.</span><span class="n">addr_bytes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">addr</span><span class="p">.</span><span class="n">addr_bytes</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+            <span class="n">addr</span><span class="p">.</span><span class="n">addr_bytes</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">addr</span><span class="p">.</span><span class="n">addr_bytes</span><span class="p">[</span><span class="mi">5</span><span class="p">]);</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+
+<p>This function takes as a parameter a structure <code>struct ether_addr</code> that is <a href="https://doc.dpdk.org/api/structether__hdr.html">defined</a> in the DPDK API. It contains the Destination and Source MAC addresses and the Ethernet Type. We can simply call it as <code>print_mac(eth-&gt;d_addr)</code> to print out the destination address.</p>
+
+<h3 id="add-the-print-ip-address-function">Add: the &lsquo;print IP address&rsquo; function</h3>
+
+<p>MAC addresses are good, but IP addresses are even better. Here is a function to print them.</p>
+
+<div class="brush: c">
+ <div class="source">
+  <pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;arpa/inet.h&gt;</span><span class="cp"></span>
+
+<span class="kt">void</span> <span class="nf">print_ip</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">ipn</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">uint8_t</span> <span class="n">bytes</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+    <span class="kt">uint32_t</span> <span class="n">ip</span> <span class="o">=</span> <span class="n">ntohl</span><span class="p">(</span><span class="n">ipn</span><span class="p">);</span>
+    <span class="n">bytes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ip</span> <span class="o">&gt;&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">;</span>
+    <span class="n">bytes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ip</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">;</span>
+    <span class="n">bytes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ip</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">;</span>
+    <span class="n">bytes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ip</span> <span class="o">&gt;&gt;</span> <span class="mi">24</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">;</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\t</span><span class="s">%d.%d.%d.%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">bytes</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">bytes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bytes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bytes</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+
+<h3 id="add-the-hexdump-capability">Add: the &lsquo;hexdump&rsquo; capability</h3>
+
+<p>DPDK has a built-in function to print hexdumps. It is a nice feature to have in a packet capturer. The only thing we need is to include the header and then the function becomes available to us.</p>
+
+<div class="brush: c">
+ <div class="source">
+  <pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;rte_hexdump.h&gt;</span><span class="cp"></span>
+
+<span class="p">...</span>
+
+<span class="n">rte_hexdump</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="kt">void</span><span class="o">*</span><span class="p">)</span> <span class="n">data</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+</pre></div>
+
+</div>
+
+<p>At this point we have everything we need to make an elementary packet capture utility.</p>
+
+<h2 id="running-your-program">Running your program</h2>
+
+<p>You&rsquo;ve made some changes. Now it&rsquo;s time to test them.</p>
+
+<pre><code>Tip:
+  Don't forget to run the executable with `sudo`
+
+Tip:
+  You have to export the variable RTE_SDK so that the compiler knows where to find the DPDK sources</code></pre>
+
+<pre><code>dproxy@proxy:~$ cd dpdk
+dproxy@proxy:~/dpdk$ export RTE_SDK=$(pwd)  # must be set to the root of dpdk!
+dproxy@proxy:~/dpdk$ cd examples/skeleton/
+dproxy@proxy:~/dpdk/examples/skeleton$ make
+  CC basicfwd.o
+  LD basicfwd
+  INSTALL-APP basicfwd
+  INSTALL-MAP basicfwd.map
+dproxy@proxy:~/dpdk/examples/skeleton$ sudo ./build/basicfwd
+[sudo] password for dproxy:
+EAL: Detected 2 lcore(s)
+EAL: Detected 1 NUMA nodes
+EAL: Multi-process socket /var/run/dpdk/rte/mp_socket
+EAL: Probing VFIO support...
+EAL: PCI device 0000:00:03.0 on NUMA socket -1
+EAL:   Invalid NUMA socket, default to 0
+EAL:   probe driver: 8086:100e net_e1000_em
+EAL: PCI device 0000:00:08.0 on NUMA socket -1
+EAL:   Invalid NUMA socket, default to 0
+EAL:   probe driver: 8086:100e net_e1000_em
+Port 0 MAC: 08 00 27 77 3e 77
+
+WARNING: Too many lcores enabled. Only 1 used.
+
+Core 0 forwarding packets. [Ctrl+C to quit]
+^C
+dproxy@proxy:~/dpdk/examples/skeleton$
+</code></pre>
+
+<p>And that&rsquo;s it!</p>
+
+<h3 id="you-can-find-the-code-i-used-in-a-gist-httpsgistgithubcombillpcsb4cecf4d65768aaabe8c0ba9eca34038here">You can find the code I used in a gist <a href="https://gist.github.com/billpcs/b4cecf4d65768aaabe8c0ba9eca34038">here</a></h3>
+
+<h3 id="you-can-find-the-program-in-action-httpsiimgurcomzxmhdcpmp4here-20mb-gif">You can find the program in action <a href="https://i.imgur.com/ZxMhdCp.mp4">here</a> (20MB gif)</h3>
+
+<p>Sources:</p>
+
+<ul>
+ <li>https://www.netgate.com/blog/further-a-roadmap-for-pfsense.html</li>
+ <li>https://blog.cloudflare.com/how-to-receive-a-million-packets/</li>
+ <li>https://www.sdxcentral.com/networking/nfv/definitions/whats-network-functions-virtualization-nfv/</li>
+ <li>https://www.virtualbox.org/manual/ch06.html</li>
+ <li>https://blogs.oracle.com/scoter/networking-in-virtualbox-v2</li>
+ <li>https://www.saminiir.com/openvpn-puts-packets-inside-your-packets/</li>
+ <li>https://www.youtube.com/user/mahler711/</li>
+ <li>https://lwn.net/Articles/629155/</li></ul>
+    </div>
+    <footer>
+        <script type="text/javascript">
+          !function(d,s,id){
+              var js,fjs=d.getElementsByTagName(s)[0];
+              if(!d.getElementById(id)){
+                  js=d.createElement(s);
+                  js.id=id;
+                  js.src="//platform.twitter.com/widgets.js";
+                  fjs.parentNode.insertBefore(js,fjs);
+              }
+          }(document,"script","twitter-wjs");
+        </script>
+        <a href="https://twitter.com/share"
+           class="twitter-share-button"
+           data-url="http://billpcs.github.io/2019/05/an-intro-to-dpdk-for-mortals.html"
+           data-dnt="true">
+          "Tweet"</a>
+        <ul class="pager">
+
+        <li class="next">
+          <a href="/2018/03/sdes-in-scala.html"><em>SDES in Scala</em> &rarr;</a>
+        </li>
+        </ul>
+    </footer>
+    <hr>
+</article>
+            </div>
+        </div>
+        <footer>
+            <hr />
+            <p>Site generated by <a href="https://github.com/greghendershott/frog">Frog</a>, the <strong>fr</strong>ozen bl<strong>og</strong> tool.</p>
+            <p>Using <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>.</p>
+        </footer>
+    </div>
+    <!-- </body> JS -->
+    <script type="text/javascript" src="/js/jquery-3.2.1.slim.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
