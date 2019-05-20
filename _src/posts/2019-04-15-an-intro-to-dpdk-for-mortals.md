@@ -2,22 +2,22 @@
     Date: 2019-05-16T20:17:15
     Tags: dpdk,c,ip
 
-_DPDK can be a bit intimidating even if this is not your first time writing C network code. In this (rather long) post, I aim to offer a step by step introduction to DPDK, from understanding its usefulness, to setting up the environment, to finally writing a small program that uses the library. Take your time with the links, the steps and the commands. Don't overwhelm yourself. See you on the other side!_
+_DPDK can be a bit intimidating even if this is not your first time writing C network code. In this (rather long) post, I aim to offer a step by step introduction to DPDK; from understanding its usefulness, to setting up the environment and up to finally writing a small program that uses the library. Take your time with the links, the steps and the commands; don't overwhelm yourself. See you on the other side!_
 
 <!-- more -->
 
 ## Motivation
 
-Sometimes you just want to process packets at line rate. This means you need to process about [14Mpps on a 10Gbps interface](https://www.netgate.com/blog/further-a-roadmap-for-pfsense.html). A standard GNU/Linux setup can reach a throughput of [about 1Mpps](https://blog.cloudflare.com/how-to-receive-a-million-packets/). Of course, even 1Mpps is amazingly more packets per second than any one user can know what to do with. Such rates are mostly needed for specialized applications that are running on general purpose computers. But why would one want to do such a thing? Why not buy an embedded black-box enterprise solution, a thingy that is made with low-level stuff (maybe ASICs, FPGAs, native C code) and instead introduce all those layers of abstractions with operating systems and the like?
+Sometimes you just want to process packets at line rate. This means you need to process about [14Mpps on a 10Gbps interface](https://www.netgate.com/blog/further-a-roadmap-for-pfsense.html). A standard GNU/Linux setup can reach a throughput of [about 1Mpps](https://blog.cloudflare.com/how-to-receive-a-million-packets/). Of course, even 1Mpps is amazingly more packets per second than any one user could know what to do with. Such rates are mostly needed for specialized applications that are running on general purpose computers. But why would one want to do such a thing? Why not buy an embedded black-box enterprise solution, a device that is made with low-level components (maybe ASICs, FPGAs, native C code) and instead introduce all those layers of abstractions with operating systems and the like?
 
 
-It's true, such low-level solutions still exist. However there is also a new approach in network architectures called Network Function Virtualization commonly seen as NFV. The idea is that instead of this 'specialized thingy' ([like this one](https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Cisco_small_business_SG300-28_28-port_Gigabit_Ethernet_rackmount_switch.jpg/800px-Cisco_small_business_SG300-28_28-port_Gigabit_Ethernet_rackmount_switch.jpg)) you instead use a general purpose computer ([like this one](https://upload.wikimedia.org/wikipedia/commons/8/85/Macpro.png)). What's good with such a computer is that everything can be virtual. You can spawn OSs, switches, even whole LANs, all inside this server. You can even interconnect many such computers and make even more intricate topologies and operations. When one virtual network is no longer needed you can just shut it down. The empty 'space' left can be covered by an other process that needs to run instead of being wasted. Let alone being able to edit the source code to your needs, make security fixes or develop new features. Of course there is much more to NFV. You can start from [wikipedia](https://en.wikipedia.org/wiki/Network_function_virtualization) or [sdxcentral](https://www.sdxcentral.com/networking/nfv/definitions/whats-network-functions-virtualization-nfv/) if you are so inclined.
+It's true, such low-level solutions still exist. However there is also a new approach in network architecture called Network Function Virtualization commonly seen as NFV. The idea is that instead of this 'specialized thingy' ([like this one](https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Cisco_small_business_SG300-28_28-port_Gigabit_Ethernet_rackmount_switch.jpg/800px-Cisco_small_business_SG300-28_28-port_Gigabit_Ethernet_rackmount_switch.jpg)) you instead use a general purpose computer ([like this one](https://upload.wikimedia.org/wikipedia/commons/8/85/Macpro.png)). What's good with such a setup is that everything can be virtual. You can spawn OSs, switches, even whole LANs, all inside this computer-server. You can even interconnect many such computers and make even more intricate topologies and operations. When one virtual network is no longer needed you can just shut it down. The empty 'space' left behind can be covered by any other process that needs to run instead of being wasted unused. Moreover, being able to edit the source code to your needs makes it easier to develop security fixes or new features. Of course there is much more to NFV. You can start from [wikipedia](https://en.wikipedia.org/wiki/Network_function_virtualization) or [sdxcentral](https://www.sdxcentral.com/networking/nfv/definitions/whats-network-functions-virtualization-nfv/) if you are so inclined.
 
-This post is going to be a guide through the setup of such Virtual Network Function all inside your computer, with the help of DPDK of course.
+This post is going to be a guide through the setup of such a Virtual Network Function all inside your computer, with the help of DPDK of course.
 
 ## What is DPDK?
 
-I suppose that if you are reading this you are somewhat familiar with DPDK. However, I can try to give my take on it. If I had to describe DPDK in the simplest fashion I would say this: It is a library written in C that bypasses the kernel, brings the packets to the userspace and offers efficient ways to manipulate them. It preallocates memory (no `malloc`s during runtime), it polls the NIC instead of using interrupts and uses efficient data structures.
+I suppose that if you are reading this you are somewhat familiar with DPDK. However, I can try to give you my take on it. If I had to describe DPDK in the simplest fashion I would say this: It is a library written in C that bypasses the kernel, brings the packets to the userspace and offers efficient ways to manipulate them. It preallocates memory (no `malloc`s during runtime), polls the NIC instead of using interrupts and uses efficient data structures.
 
 ## What you will need
 
@@ -33,25 +33,25 @@ Here is what we are going to do: Have your computer spawn a virtual switch which
 
 <img src="../../img/overview-2019.svg" style="border-radius: 2%;display: block;margin-left: auto;margin-right: auto;width: 45%;">
 
-The problem is this: Alice and Bob like to send files and messages to each other. However Eve, the evil user of Proxy has configured the switch in such a way that it forwards any packet received to herself too! Now that all packets reach the Proxy, Eve has one final and crucial mission: To build a fast packet capture program, to log everything of interest. Naturally, she has asked for our help, which we will of course happily provide (she doesn't know of `tcpdump`, shhh...)
+The problem is this: Alice and Bob like to send files and messages to each other. However Eve, the evil user of Proxy has configured the switch in such a way that it forwards any packet received to herself too! Now that all packets reach the Proxy, Eve has one final and crucial mission: To build a fast packet capture program to log everything of interest. Naturally, she has asked for our help, which we will happily provide, of course. (She doesn't know of `tcpdump`, shhh...)
 
-But why is this a VNF? Well because, to put it simply, we can bundle it in a standalone image, and whenever we need a fast packet capturer, boot it with the correct configuration and let everything take care of itself. If the traffic becomes too big for one instance of the packet capturer, we could always make more copies and deploy them accordingly.
+But why is this a VNF? Well because, to put it simply, we can bundle it in a standalone image, and whenever we need a fast packet capturer, boot it with the correct configuration and let everything take care of itself. If the traffic becomes too much for one instance of the packet capturer, we could always make more copies and deploy them accordingly.
 
-This is one of the simplest VNFs one can build. More challenging ones include Deep Packet Inspection VNFs, firewall VNFs, or load balancing VNFs. In all these cases one generally looks in the packet contents to decide what to do with a packet. Drop it? Forward it? Log it? Respond with a certain message to the sender?
+This is one of the simplest VNFs one can build. More challenging ones include Deep Packet Inspection VNFs, firewall VNFs, or load balancing VNFs. In all of these cases, one generally looks in the packet contents to decide what to do with a packet. Drop it? Forward it? Log it? Respond with a certain message to the sender?
 
 ## Setting up Alice and Bob
 
 We can start by giving Alice and Bob two computers to communicate.
 
-To do this, first install [VirtualBox](https://www.virtualbox.org/) in some way. This is going to be the place Alice and Bob (and of course later the Proxy) will live. Then, we have to choose an OS for them. I used [Ubuntu Server](https://www.ubuntu.com/download/server). There is no need for a graphical interface. Let's keep it lightweight. After all, we will be spawning three different Virtual Machines.
+To do this, first install [VirtualBox](https://www.virtualbox.org/) in some way. This is going to be the place Alice and Bob live (and later the Proxy, of course) Then, we have to choose an OS for them. I used [Ubuntu Server](https://www.ubuntu.com/download/server). There is no need for a graphical interface. Let's keep it lightweight. After all, we will be spawning three different Virtual Machines.
 
-At the time of writing 18.04 is the latest LTS release and this is what I am going to install. I will then create the first two virtual machines, one called Alice and one called Bob (you can also create the Proxy too, but we will not be using it for now). I used `alice` and `bob` as names for the first and the second VM respectively for every name field that was requested. Any configuration I do from now on applies to all the VMs -in cases it does not, I will explicitly say so.
+At the time of writing 18.04 is the latest LTS release and this is what I am going to install. I will then create the first two virtual machines, one called Alice and one called Bob (you can also create the Proxy, but we will not be using it for now). I used `alice` and `bob` as names for the first and the second VM respectively for every name field that was requested. Any configuration I do from now on applies to all the VMs -in cases it does not, I will explicitly say so.
 
-When you first install a Virtual Machine on VirtualBox its network is automatically configured to NAT, as it is a good default. It allows you to have connectivity to 'the outside world' in order to install updates, surf the Internet, etc. However, you can also surf the Internet in a different way, using a **Bridged Adapter** and binding it to your wireless or wired interface. This mode is the one we will be using. You can check out what this and the other networking modes mean [here](https://www.virtualbox.org/manual/ch06.html#networkingmodes) and [here](https://blogs.oracle.com/scoter/networking-in-virtualbox-v2). Don't be afraid to become familiar with them if you aren't already!
+When you first install a Virtual Machine on VirtualBox its network is automatically configured to NAT, as it is a good default. It allows you to have connectivity to 'the outside world' in order to install updates, surf the Internet, etc. However, you can also connect to the Internet in a different way, using a **Bridged Adapter** and binding it to your wireless or wired interface. This mode is the one we will be using. You can check out what this and the other networking modes mean [here](https://www.virtualbox.org/manual/ch06.html#networkingmodes) and [here](https://blogs.oracle.com/scoter/networking-in-virtualbox-v2). Don't be afraid to become familiar with them if you aren't already!
 
-For our purposes, we will need two interfaces, so enable the first two adapters. **The first one will be used for building our DPDK network and testing our program and the second one in order to have connectivity to the Internet.** Make the first one **Not Attached** (because we haven't created our DPDK network yet) and the second one **Bridged** to your wired or wireless interface (this one is hopefully already there).  After you have enabled these two adapters, go ahead and boot the two virtual machines.
+For our purposes, we will need two interfaces, so enable the first two adapters. **The first one will be used for building our DPDK network and testing our program and the second one in order to have connectivity to the Internet.** Make the first one **Not Attached** (because we haven't created our DPDK network yet) and the second one **Bridged** to your wired or wireless interface (hopefully, this one is already there).  After you have enabled these two adapters, go ahead and boot the two virtual machines.
 
-By using _Bridged Networking_ on the second adapter, we create a small network in which the _host_ (your laptop or your PC) and all the VMs are visible to each other, as if they are in the same subnet. As a first step, we can check that Alice and Bob can send packets to each other. We can test this by making a simple `nmap` scan in our local network. Alice and Bob should show up. Something in the lines of `nmap -F 192.168.1.1/24` should work, adjusting the notation for your own network. This is the output for me
+By using _Bridged Networking_ on the second adapter, we create a small network in which the _host_ (your laptop or your PC) and all the VMs are visible to each other, as if they are in the same subnet. As a first step, we can check whether Alice and Bob can send packets to each other. We can test this by making a simple `nmap` scan in our local network. Alice and Bob should show up. Something in the lines of `nmap -F 192.168.1.1/24` should work, adjusting the notation for your own network. This is the output for me
 
 ```
 Starting Nmap 7.01 ( https://nmap.org ) at 2019-03-07 19:49 EET
@@ -86,7 +86,7 @@ Nmap done: 256 IP addresses (4 hosts up) scanned in 3.15 seconds
 
 We can see that both `alice` and `bob` are up. The other two machines are the default gateway (`gtw`) and the host (`ngt`). There are many other tests you can run. For example test if the two machines (`alice` and `bob`) can ping each other.
 
-In order to make your life easier for what is to follow, you should edit the `/etc/network/interfaces` file for each machine. Here is what is should look like:
+In order to make your life easier for what is to follow, you should edit the `/etc/network/interfaces` file for each machine. Here is what it should look like:
 
 ```bash
 # The loopback network interface
@@ -106,7 +106,7 @@ allow-hotplug enp0s8
 iface enp0s8 inet dhcp        
 ```
 
-There is a non-zero chance that the names of the interfaces will differ in your case. Change them accordingly. (`ip link show` may help to find out their names). This configuration will tell the first adapter (`enp0s3`, the one we will use for DPDK) to have a static IP. Notice that we can choose whatever we like as an IP for this interface because the network created with `enp0s3` will be local and cut out from the rest of the world. You could have thus chosen anything, for example `122.122.122.122` or `10.12.13.14`. It doesn't matter (as long as you set the subnet mask correctly). This configuration will also tell your second network adapter (`enp0s8`, the one bridged with your computer's interface) to request an IP using DHCP. In this way every time you boot the VM, the interfaces will automatically be assigend IP's.
+Since there is a non-zero chance that the names of the interfaces will differ in your case, change them accordingly. (`ip link show` may help to find out their names). This configuration will tell the first adapter (`enp0s3`, the one we will use for DPDK) to have a static IP. Notice that we can choose whatever we like as an IP for this interface because the network created with `enp0s3` will be local and cut out from the rest of the world. Thus, you could have chosen anything, for example `122.122.122.122` or `10.12.13.14`. It doesn't matter (as long as you set the subnet mask correctly). This configuration will also tell your second network adapter (`enp0s8`, the one bridged with your computer's interface) to request an IP using DHCP. In this way every time you boot the VM, the interfaces will automatically be assigned IP's.
 
 ```
 Note:
@@ -116,7 +116,7 @@ Note:
 
 ## Installing openssh-server (optional)
 
-Because I find having to work with terminal environments in VirtualBox cumbersome, I prefer to install openssh-server and connect to every VM from my terminal. It is very simple to do if you want to:
+Because I find having to work with terminal environments in VirtualBox cumbersome, I prefer to install openssh-server and connect to every VM from my terminal. This is very simple to do if you want to:
 
 ```sh
 # in your VM (e.g alice)
@@ -135,7 +135,7 @@ alice@alice:~$
 
 ## Setting up the switch
 
-We can continue our journey by simply introducing the switch to the equation (before it becomes evil and starts sending packets here and there). Up to now Alice and Bob were connected through their second adapter, with Virtual Box playing the role of the switch. Now we will add our own switch and create a second network using the first adapter. It's something like your computer having two NICs and connecting to two different networks simultaneously. But with the virtual adapters VirtualBox offers, we can do it with no cost at all. Isn't the virtual space beautiful?
+We can continue our journey by introducing the switch to the equation (before it becomes evil and starts sending packets here and there). Up to now Alice and Bob were connected through their second adapter, with Virtual Box playing the role of the switch. Now we will add our own switch and create a second network using the first adapter. It's as if your computer had two NICs and connected to two different networks simultaneously. But with the virtual adapters VirtualBox offers, we can do just that with no cost at all. Isn't the virtual space beautiful?
 
 As you may have guessed we will use Open vSwitch. Let's install it first. On Ubuntu based distributions this is done like so:
 
@@ -143,7 +143,7 @@ As you may have guessed we will use Open vSwitch. Let's install it first. On Ubu
 sudo apt install openvswitch-switch
 ```
 
-but on other distributions you may have to use another package manager. You can consider installing from source too! (more info [here](http://www.openvswitch.org/))
+but on other distributions you may have to use another package manager. You can consider installing it from source too! (more info [here](http://www.openvswitch.org/))
 
 When this is done, go ahead and start the ovs deamon
 
@@ -163,9 +163,9 @@ this should output something like the following:
  * Enabling remote OVSDB managers
 ```
 
-You know what this means? That your computer is now a _habitable_ environment for a switch!
+Do you know what this means? That your computer is now a _habitable_ environment for a switch!
 
-Two are the basic command line tools that we are going to use. `ovs-vsctl` and `ovs-ofctl`. `vsctl` stands for VSwitchd ConTroL and as such it is mainly concerned with querying and modifying the OvS database. On the other hand `ovs-ofctl` stands for OpenFlow ConTroL. From here we can create rules for our switches or see their current status. Anything relating to OpenFlow really.
+We are going to use two basic command line tools; `ovs-vsctl` and `ovs-ofctl`. `vsctl` stands for VSwitchd ConTroL and as such it is mainly concerned with querying and modifying the OvS database, while `ovs-ofctl` stands for OpenFlow ConTroL. From here we can create rules for our switches or see their current status; anything relating to OpenFlow really.
 
 
 -  Let's start by creating a bridge. It's as simple as that:
@@ -198,9 +198,9 @@ So here is what we essentially get with the above configuration:
 
 <img src="../../img/bridge-2-2019.svg" style="border-radius: 2%;display: block;margin-left: auto;margin-right: auto;width: 20%;">
 
-Those two colored boxes are ports. If this was a real bridge and not a virtual one you could really get your Ethernet cables from each PC and stick each one to the respective port (just like you do when you connect your computer to your home router via Ethernet). Now these cables are virtual too, so we do this "sticking" through the VirtualBox GUI.
+Those two colored boxes are ports. If this was a real bridge and not a virtual one you could physically get your Ethernet cables from each PC and plug each one in the respective port (just like what you do when you connect your computer to your home router via Ethernet). Now these cables are virtual, so we do this plugging-in through the VirtualBox GUI.
 
-You can now boot the machines with the first Adapter's 'Attached to' set to **Bridged Adapter** (the one we left "Not Attached" earlier) and the 'Name' set to `vnet-alice` and `vnet-bob` accordingly. Due to the configuration we did earlier in `/etc/network/interfaces` the ports will be assigned IPs. This means that we can get the two machines communicating again, this time over OvS and not over VirtualBox.
+You can now boot the machines with the first Adapter's 'Attached to' set to **Bridged Adapter** (the one we left "Not Attached" earlier) and the 'Name' set to `vnet-alice` and `vnet-bob` accordingly. Due to the configuration we set earlier in `/etc/network/interfaces` the ports will be assigned IPs. This means that we can get the two machines communicating again, this time over OvS and not over VirtualBox.
 
 To put it differently, now `alice` and `bob` can communicate through two distinct routes:
 
@@ -216,9 +216,9 @@ The same shown as an image:
 
 ## Making the switch evil
 
-If you haven't created the third and last VM, now is the time! Let's create the Proxy, the place our DPDK code will run on.
+If you haven't created the third and last VM, now is the time! Let's create the Proxy, the place where our DPDK code will run.
 
-Just create the VM and do the respective configuration we did on Alice and Bob. Here is a quick recap:
+Just create the VM and configure it the same way we did on Alice's and Bob's VMs. Here is a quick recap:
 
 On the host:
 
@@ -252,7 +252,7 @@ iface enp0s8 inet dhcp
 
 On the Proxy Virtual Box Network Settings, set the first adapter to connect to `vnet-proxy` and the second one to your network, just like we did before.
 
-**Also, it is very important to set the Promiscuous mode to _Allow all_ or else VirtualBox will drop the packets not destined for Proxy (which we of course don't like)**
+**Also, it is very important to set the Promiscuous mode to _Allow all_ or else VirtualBox will drop the packets not destined for the Proxy (something we don't want, of course)**
 
 To see some more information on the bridge and its various ports we can issue the command
 
@@ -290,14 +290,14 @@ actions: output enqueue set_vlan_vid set_vlan_pcp strip_vlan mod_dl_src
 OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0
 ```
 
-Thus `port 1` is Alice, `port 2` is Bob and `port 3` is the Proxy. It may be different in your case but it won't matter. Here is the updated view of our bridge:
+Thus `port 1` is Alice, `port 2` is Bob and `port 3` is the Proxy. The aliases may be different in your case but this won't matter. Here is the updated view of our bridge:
 
 <img src="../../img/bridge-2019.svg" style="border-radius: 2%;display: block;margin-left: auto;margin-right: auto;width: 30%;">
 
 
 Now it's time for the `br0` to become evil. For it to be evil, it has to have a way to forward packets to PC-Proxy when they conform to certain criteria.
 
-Let's add some rules then. These rules will modify the switch in such a way that every packet will reach Proxy too.
+Let's add some rules then. These rules will modify the switch in such a way that every packet will reach the Proxy too.
 
 ```bash
 # delete old rules
@@ -313,7 +313,7 @@ sudo ovs-ofctl add-flow br0 in_port="vnet-bob",actions=output:"vnet-proxy",norma
 
 It's about time we did some coding. The switch is sending us the packets Alice and Bob are exchanging but we have no way yet to see them! (well, excluding `tcpdum` :P). We will now build our simple packet capture utility using DPDK. It won't be elaborate at all, however, if you are anything like me when I first used DPDK, it could be your first time writing C programs to capture real traffic! And this is amazing.
 
-We will now get the dpdk sources, compile the project and modify our network card so that we can run dpdk code on it. For this, boot PC-Proxy and issue these commands.
+We will now get the DPDK sources, compile the project and modify our network card so that we can run DPDK code on it. For this, boot PC-Proxy and issue these commands.
 
 ```bash
 sudo apt install -y make gcc libnuma-dev build-essential python pkg-config
@@ -335,7 +335,7 @@ Tip:
   Ctrl-U deletes everything you have written in the line
 ```
 
-Before executing it, first bring down the interface you decided to give to DPDK. DPDK will take over it now. In my case, I used this command:
+Before executing it, bring down the interface you decided to give to DPDK. DPDK will take over it now. In my case, I used this command:
 
 ```
 sudo ifconfig enp0s3 down
@@ -351,20 +351,20 @@ Tip:
 1. **Compile** (I use No. `15`, x86_64 with gcc)
 2. **Insert the driver** (I use No. `18`, igb_uio)
 3. **Create hugepages for non-NUMA systems** (No. `21`, 64 should be fine)
-4. **Bind the network interface to dpdk** (No. `24` aaaand ... dpdk takes over the network interface!)
+4. **Bind the network interface to DPDK** (No. `24` aaaand ... DPDK takes over the network interface!)
 
 Aaahhh, at last. We can write some code
 
 ## Developing the packet capture
 
-The _skeleton_ of our development endeavors is going to be a file dpdk offers bundled with the library under the `examples/`. It is a _bear bones_ application that has some annoying things already taken care of so that we can focus on developing the logic. I don't know if you took the hint but the file we are interested in is indeed under `skeleton/`. It is called basicfwd.c and it has a very very simple dpdk application. I like this file because it deals with all the initialization stuff so that we don't have to mess with them yet, and also leaves enough space to make small changes and observe the outcome.
+The _skeleton_ of our development endeavors is going to be a file DPDK offers bundled with the library under the `examples/`. It is a _bear bones_ application that has some annoying things already taken care of so that we can focus on developing the logic. I don't know if you took the hint but the file we are interested in is indeed under `skeleton/`. It is called basicfwd.c and it has a very very simple DPDK application. I like this file because it deals with all the initialization processes so that we don't have to mess with them yet, and also leaves enough space to make small changes and observe the outcome.
 
 
-This program does some things that we don't want it to do. So first of, we are going to remove some unnecessary code and then insert our own. What this program does essentially, is to receive frames in one port and forward them in a second one. We, however, only want to receive packets and maybe print them to the screen. Nothing more. So there are a couple of places even the _skeleton_ contains too much for our purposes. There is still some code that we will have to remove. Then we add our own.
+This program does some things that we don't want it to do. So first of, we are going to remove some unnecessary code and then insert our own. What this program does essentially, is to receive frames in one port and forward them in a second one. We, however, only want to receive packets and maybe print them to the screen. Nothing more. So there are a couple of places even the _skeleton_ contains too much for our purposes. There is still some code that we will have to remove. Then we will add our own.
 
 The whole file is just three functions, `port_init()`, `lcore_main()` and `main()`. `port_init()` we don't even care about. We pray it does what it claims it does correctly and move on. The `main()` function we only care about slightly, to the extend that we can see the general structure of the program; initialize this, take that, call the other function etc. Our changes will be focused on `lcore_main()`. A function that essentially is called and then runs forever.
 
-It is during this function call that packets are "received" and can be "sent". On of the ways DPDK can take data from the wire is the function `rte_eth_rx_burst()` which when called fills in a buffer of packets. The buffer can be thought of as a chunk of memory where the packets reside after the call. It returns the number of packets that where eventually received. So then `buf[0]` is the first packet, `buf[1]` is the second, and so on. This buffer except for the data that were indeed in the wire, contains some metadata. So in order to reach the point the real data is, we can use a function DPDK conveniently provides just for this purpose. This is `rte_pktmbuf_mtod`. Here is how it works
+It is during this function call that packets are "received" and can be "sent". One of the ways DPDK can take data from the wire is the function `rte_eth_rx_burst()` which when called fills in a buffer of packets. The buffer can be thought of as a chunk of memory where the packets reside after the call. It returns the number of packets that where eventually received. So then `buf[0]` is the first packet, `buf[1]` is the second, and so on. This buffer excepts that the data that were indeed in the wire, contain some metadata. So in order to reach the point where the real data are, we can use a function DPDK conveniently provides just for this purpose. This is `rte_pktmbuf_mtod`. Here is how it works
 
 ```c
 #include <rte_ip.h>
@@ -413,7 +413,7 @@ Note:
 
 ### Remove: the 'if tx < rx' check
 
-A check is made like to see if some packets were not transmitted, and if it is true free them. Given that this will always be the case in our example, there is no need to test for it. (we only remove the outer `if`, we still want to free the buffers in the `for` loop)
+A check is made in order to see if some packets were not transmitted, and if that is true to free them. Given that this will always be the case in our example, there is no need to test for it. (we only remove the outer `if`, we still want to free the buffers in the `for` loop)
 
 ```c
 if (unlikely(nb_tx < nb_rx)) {
@@ -427,7 +427,7 @@ At this point we are free to write our code.
 
 ### Add: the 'print MAC address' function
 
-Usually my first step in writing code is to create function that will give some visual queues to see if everything is normal. In this case my first step was to create a function to print the a MAC address. When I receive a packet I send the Source and Destination MAC address to this function. That way I can clearly see if I am getting the frames I am supposed to when executing the program. After all, what is a packet capturing utility without seeing some MAC addresses?
+Usually my first step in writing code is to create a function that will return some visual queues to see if everything is normal. In this case my first step was to create a function to print the MAC address. When I receive a packet I send the Source and Destination MAC address to this function. That way I can clearly see if I am getting the frames I am supposed to when executing the program. After all, what is a packet capturing utility without seeing some MAC addresses?
 
 ```c
 void print_mac(struct ether_addr addr) {
@@ -462,7 +462,7 @@ void print_ip(uint32_t ipn) {
 
 ### Add: the 'hexdump' capability
 
-DPDK has a built-in function to print hexdumps. It is a nice feature to have in a packet capturer. The only thing we need is to include the header and then the function becomes available to us.
+DPDK has a built-in function to print hexdumps. It is a nice feature to have in a packet capturer. The only thing we need to do is to include the header and then the function becomes available to us.
 
 
 ```c
