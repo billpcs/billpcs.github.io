@@ -14,7 +14,7 @@
   <author>
    <name>bill</name></author>
   <content type="html">
-&lt;p&gt;&lt;em&gt;DPDK can be a bit intimidating even if this is not your first time writing C network code. In this (rather long) post, I aim to offer a step by step introduction to DPDK, from understanding its usefulness, to setting up the environment, to finally writing a small program that uses the library. Take your time with the links, the steps and the commands. Don&amp;rsquo;t overwhelm yourself. See you on the other side!&lt;/em&gt;&lt;/p&gt;&lt;a href="http://billpcs.github.io/2019/05/an-intro-to-dpdk-for-mortals.html?utm_source=ip&amp;amp;utm_medium=Atom"&gt;&lt;em&gt;More&amp;hellip;&lt;/em&gt;&lt;/a&gt;</content></entry>
+&lt;p&gt;&lt;em&gt;DPDK can be a bit intimidating even if this is not your first time writing C network code. In this (rather long) post, I aim to offer a step by step introduction to DPDK; from understanding its usefulness, to setting up the environment and up to finally writing a small program that uses the library. Take your time with the links, the steps and the commands; don&amp;rsquo;t overwhelm yourself. See you on the other side!&lt;/em&gt;&lt;/p&gt;&lt;a href="http://billpcs.github.io/2019/05/an-intro-to-dpdk-for-mortals.html?utm_source=ip&amp;amp;utm_medium=Atom"&gt;&lt;em&gt;More&amp;hellip;&lt;/em&gt;&lt;/a&gt;</content></entry>
  <entry>
   <title type="text">The first blog post</title>
   <link rel="alternate" href="http://billpcs.github.io/2016/12/the-first-blog-post.html?utm_source=ip&amp;utm_medium=Atom" />
