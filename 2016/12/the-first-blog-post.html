@@ -91,14 +91,10 @@
 <p>Scala can be very concise and yet readable with some nicely written chains of operations. Let&rsquo;s see it in action here:</p>
 
 <div class="brush: scala">
- <div class="source">
-  <pre><span></span>  <span class="k">def</span> <span class="n">toIp</span><span class="o">(</span><span class="n">str</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span>
-     <span class="n">str</span><span class="o">.</span><span class="n">grouped</span><span class="o">(</span><span class="mi">8</span><span class="o">)</span>
-        <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">el</span> <span class="k">=&gt;</span> <span class="nc">Integer</span><span class="o">.</span><span class="n">parseInt</span><span class="o">(</span><span class="n">el</span><span class="o">,</span> <span class="mi">2</span><span class="o">))</span>
-        <span class="o">.</span><span class="n">mkString</span><span class="o">(</span><span class="s">"."</span><span class="o">)</span>   
-</pre></div>
-
-</div>
+ <pre><code>  def toIp(str: String) =
+     str.grouped(8)
+        .map(el =&gt; Integer.parseInt(el, 2))
+        .mkString(".")   </code></pre></div>
 
 <p>The <code>grouped(n)</code> method is defined for all the members of <code>scala.collection.IterableLike</code> which <code>String</code> is a member of. But let&rsquo;s not get too involved.</p>
 
@@ -109,57 +105,37 @@
 <p>Now we can just say</p>
 
 <div class="brush: scala">
- <div class="source">
-  <pre><span></span>  <span class="k">@</span> <span class="n">toIp</span><span class="o">(</span><span class="s">"10000000000010100000001000011110"</span><span class="o">)</span>
-  <span class="n">res1</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"128.10.2.30"</span>
-</pre></div>
-
-</div>
+ <pre><code>  @ toIp("10000000000010100000001000011110")
+  res1: String = "128.10.2.30"</code></pre></div>
 
 <p><strong><em>Let&rsquo;s try Python!</em></strong></p>
 
 <p>The best way I could come up with, without making and import, is this</p>
 
 <div class="brush: python">
- <div class="source">
-  <pre><span></span>  <span class="k">def</span> <span class="nf">to_ip</span><span class="p">(</span><span class="n">bitstr</span><span class="p">):</span>
-    <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span><span class="n">bitstr</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">8</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bitstr</span><span class="p">),</span> <span class="mi">8</span><span class="p">)]</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">]</span>
-    <span class="k">return</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-</pre></div>
-
-</div>
+ <pre><code>  def to_ip(bitstr):
+    lst = [bitstr[i:i+8] for i in range(0, len(bitstr), 8)]
+    res = [str(int(i, 2)) for i in lst]
+    return '.'.join(res)</code></pre></div>
 
 <p>and then you can simply call</p>
 
 <div class="brush: python">
- <div class="source">
-  <pre><span></span>  <span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">to_ip</span><span class="p">(</span><span class="s2">"10000000000010100000001000011110"</span><span class="p">))</span>
-  <span class="mf">128.10</span><span class="o">.</span><span class="mf">2.30</span>
-</pre></div>
-
-</div>
+ <pre><code>  &gt;&gt;&gt; print(to_ip("10000000000010100000001000011110"))
+  128.10.2.30</code></pre></div>
 
 <p>But one would argue that python is no good without the imports. And I agree, so let&rsquo;s try the same thing, but now with the help of an import.</p>
 
 <div class="brush: python">
- <div class="source">
-  <pre><span></span>  <span class="kn">import</span> <span class="nn">re</span>
-  <span class="k">def</span> <span class="nf">to_ip2</span><span class="p">(</span><span class="n">bitstr</span><span class="p">):</span>
-    <span class="k">return</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;........?&#39;</span><span class="p">,</span> <span class="n">bitstr</span><span class="p">)])</span>
-</pre></div>
-
-</div>
+ <pre><code>  import re
+  def to_ip2(bitstr):
+    return '.'.join([str(int(i, 2)) for i in re.findall('........?', bitstr)])</code></pre></div>
 
 <p>so now we can call it again and get the expected results</p>
 
 <div class="brush: python">
- <div class="source">
-  <pre><span></span>  <span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">to_ip2</span><span class="p">(</span><span class="s2">"10000000000010100000001000011110"</span><span class="p">))</span>
-  <span class="mf">128.10</span><span class="o">.</span><span class="mf">2.30</span>
-</pre></div>
-
-</div>
+ <pre><code>  &gt;&gt;&gt; print(to_ip2("10000000000010100000001000011110"))
+  128.10.2.30</code></pre></div>
 
 <p>This is quite concise but it becomes difficult to read.</p>
 

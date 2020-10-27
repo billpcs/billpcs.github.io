@@ -95,15 +95,11 @@
 <p>What I came across regularly when browsing solutions on SDES was people saving binary numbers as arrays of integers, meaning saving 1&rsquo;s and 0&rsquo;s in an array. I didn&rsquo;t like this approach for various reasons. Firstly, it wastes too much space. This is because, even though we save the information of <strong>one</strong> bit in one array cell, it takes the space of at least 8 bits, if we decide to make it an Array[Byte] (and this is the best we can do in terms of memory with this type). This also means that we have to implement bitwise operations that are used extensively in SDES, from scratch. A <em>bitwise xor</em> for example would probably have to be implemented as presented below:</p>
 
 <div class="brush: scala">
- <div class="source">
-  <pre><span></span><span class="k">type</span> <span class="kt">Binary</span> <span class="o">=</span> <span class="nc">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]</span>
-<span class="k">def</span> <span class="n">xor</span><span class="o">(</span><span class="n">xs</span><span class="k">:</span> <span class="kt">Binary</span><span class="o">,</span> <span class="n">ys</span><span class="k">:</span> <span class="kt">Binary</span><span class="o">)</span><span class="k">:</span> <span class="kt">Binary</span> <span class="o">=</span>
-    <span class="k">for</span> <span class="o">{</span>
-      <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">)</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="n">xs</span> <span class="n">zip</span> <span class="n">ys</span><span class="o">)</span>
-    <span class="o">}</span> <span class="k">yield</span> <span class="o">(</span><span class="n">a</span> <span class="o">^</span> <span class="n">b</span><span class="o">).</span><span class="n">toByte</span>
-</pre></div>
-
-</div>
+ <pre><code>type Binary = Array[Byte]
+def xor(xs: Binary, ys: Binary): Binary =
+    for {
+      (a, b) &lt;- (xs zip ys)
+    } yield (a ^ b).toByte</code></pre></div>
 
 <p>Let&rsquo;s break up the above function.</p>
 
@@ -144,23 +140,15 @@
 <p>I decided to call the class which is going to contain the information for a 4 bit number <code>Bit4</code>. So let&rsquo;s start with a constructor.</p>
 
 <div class="brush: scala">
- <div class="source">
-  <pre><span></span><span class="k">class</span> <span class="nc">Bit4</span><span class="o">(</span><span class="k">val</span> <span class="n">v</span><span class="k">:</span> <span class="kt">Short</span><span class="o">)</span>
-</pre></div>
-
-</div>
+ <pre><code>class Bit4(val v: Short)</code></pre></div>
 
 <p>Then, have to implement the <code>xor</code> method:</p>
 
 <div class="brush: scala">
- <div class="source">
-  <pre><span></span><span class="k">class</span> <span class="nc">Bit4</span><span class="o">(</span><span class="k">val</span> <span class="n">v</span><span class="k">:</span> <span class="kt">Short</span><span class="o">)</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="o">|^|(</span><span class="n">that</span><span class="k">:</span> <span class="kt">Bit4</span><span class="o">)</span> <span class="k">=</span>
-    <span class="nc">Bit4</span><span class="o">((</span><span class="k">this</span><span class="o">.</span><span class="n">v</span> <span class="o">^</span> <span class="n">that</span><span class="o">.</span><span class="n">v</span><span class="o">).</span><span class="n">toShort</span><span class="o">)</span>
-<span class="o">}</span>
-</pre></div>
-
-</div>
+ <pre><code>class Bit4(val v: Short) {
+  def |^|(that: Bit4) =
+    Bit4((this.v ^ that.v).toShort)
+}</code></pre></div>
 
 <p>But this is wrong! We only want the 4 LSB of the value <code>v</code> to be accounted for in the result. By doing this we get values greater than the range a 4 bit number could have. Since numbers are represented in <code>two's complement</code> format, the range for 4 bits should be [&ndash;8 to 7]. So, how can we solve this problem?</p>
 
@@ -169,79 +157,67 @@
 <p>I really don&rsquo;t know if there is a better way, but here is what I did.</p>
 
 <div class="brush: scala">
- <div class="source">
-  <pre><span></span><span class="k">class</span> <span class="nc">Bit4</span><span class="o">(</span><span class="k">private</span> <span class="k">val</span> <span class="n">v</span><span class="k">:</span> <span class="kt">Short</span><span class="o">)</span> <span class="o">{</span>
+ <pre><code>class Bit4(private val v: Short) {
 
-  <span class="k">val</span> <span class="n">value</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">if</span> <span class="o">(((</span><span class="n">v</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="o">)</span> <span class="o">&amp;</span> <span class="mh">0x1</span><span class="o">)</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">(</span><span class="mh">0xFFFFFFF0</span> <span class="o">|</span> <span class="o">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="o">)).</span><span class="n">toShort</span>
-    <span class="k">else</span> <span class="o">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="o">).</span><span class="n">toShort</span>
-  <span class="o">}</span>
+  val value = {
+    if (((v &gt;&gt; 3) &amp; 0x1) == 1) (0xFFFFFFF0 | (v &amp; 0xF)).toShort
+    else (v &amp; 0xF).toShort
+  }
 
-  <span class="k">def</span> <span class="o">|^|(</span><span class="n">that</span><span class="k">:</span> <span class="kt">Bit4</span><span class="o">)</span> <span class="k">=</span>
-    <span class="nc">Bit4</span><span class="o">((</span><span class="k">this</span><span class="o">.</span><span class="n">value</span> <span class="o">^</span> <span class="n">that</span><span class="o">.</span><span class="n">value</span><span class="o">).</span><span class="n">toShort</span><span class="o">)</span>
-<span class="o">}</span>
-</pre></div>
-
-</div>
+  def |^|(that: Bit4) =
+    Bit4((this.value ^ that.value).toShort)
+}</code></pre></div>
 
 <p>What the above code does is check whether we need to do a sign extension with ones, i.e checks if the MSB is one. If it is, we mask the 4 LSB and sign extend the rest. If it is not, we just mask the 4 LSB. This way, whatever the input value to the constructor, the <code>value</code> will always contain a number in the correct range. If the initial element was not in the correct range, then it is a problem of the caller. I have made the decision not to report anything back or throw an exception.</p>
 
 <p>The final code for <code>Bit4</code> looks something like this:</p>
 
 <div class="brush: scala">
- <div class="source">
-  <pre><span></span><span class="k">case</span> <span class="k">class</span> <span class="nc">Bit8</span><span class="o">(</span><span class="n">v</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">BinaryNum</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="k">this</span><span class="o">(</span><span class="n">s</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span> <span class="k">this</span><span class="o">(</span><span class="nc">Integer</span><span class="o">.</span><span class="n">parseInt</span><span class="o">(</span><span class="n">s</span><span class="o">,</span> <span class="mi">2</span><span class="o">).</span><span class="n">toShort</span><span class="o">)</span>
+ <pre><code>case class Bit8(v: Int) extends BinaryNum {
+  def this(s: String) = this(Integer.parseInt(s, 2).toShort)
 
-  <span class="k">def</span> <span class="k">this</span><span class="o">(</span><span class="n">ar</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Bit</span><span class="o">])</span> <span class="k">=</span> <span class="k">this</span><span class="o">(</span><span class="n">ar</span><span class="o">.</span><span class="n">mkString</span><span class="o">)</span>
+  def this(ar: Array[Bit]) = this(ar.mkString)
 
-  <span class="c1">// consider the input as a 4bit two&#39;s complement</span>
-  <span class="c1">// so do sign extension as required</span>
-  <span class="k">val</span> <span class="n">value</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">if</span> <span class="o">(((</span><span class="n">v</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="o">)</span> <span class="o">&amp;</span> <span class="mh">0x1</span><span class="o">)</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">(</span><span class="mh">0xFFFFFFF0</span> <span class="o">|</span> <span class="o">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="o">)).</span><span class="n">toShort</span>
-    <span class="k">else</span> <span class="o">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="o">).</span><span class="n">toShort</span>
-  <span class="o">}</span>
+  // consider the input as a 4bit two's complement
+  // so do sign extension as required
+  val value = {
+    if (((v &gt;&gt; 3) &amp; 0x1) == 1) (0xFFFFFFF0 | (v &amp; 0xF)).toShort
+    else (v &amp; 0xF).toShort
+  }
 
-  <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">n</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">Bit</span> <span class="o">=</span> <span class="nc">Bit</span><span class="o">(((</span><span class="k">this</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;&gt;</span> <span class="o">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">n</span><span class="o">))</span> <span class="o">&amp;</span> <span class="mh">0x1</span><span class="o">).</span><span class="n">toByte</span><span class="o">)</span>
+  override def apply(n: Int): Bit = Bit(((this.value &gt;&gt; (4 - n)) &amp; 0x1).toByte)
 
-  <span class="k">def</span> <span class="n">map</span><span class="o">(</span><span class="n">f</span><span class="k">:</span> <span class="kt">Short</span> <span class="o">=&gt;</span> <span class="nc">Short</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Bit4</span><span class="o">(</span><span class="n">f</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="n">value</span><span class="o">))</span>
+  def map(f: Short =&gt; Short) = Bit4(f(this.value))
 
-  <span class="k">def</span> <span class="n">flatMap</span><span class="o">(</span><span class="n">f</span><span class="k">:</span> <span class="kt">Short</span> <span class="o">=&gt;</span> <span class="nc">Bit4</span><span class="o">)</span><span class="k">:</span> <span class="kt">Bit4</span> <span class="o">=</span> <span class="n">f</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="n">value</span><span class="o">)</span>
+  def flatMap(f: Short =&gt; Bit4): Bit4 = f(this.value)
 
-  <span class="k">def</span> <span class="n">map2</span><span class="o">(</span><span class="n">that</span><span class="k">:</span> <span class="kt">Bit4</span><span class="o">)(</span><span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">Short</span><span class="o">,</span> <span class="kt">Short</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">Short</span><span class="o">)</span><span class="k">:</span> <span class="kt">Bit4</span> <span class="o">=</span> <span class="k">for</span> <span class="o">{</span>
-    <span class="n">a</span> <span class="k">&lt;-</span> <span class="k">this</span>
-    <span class="n">b</span> <span class="k">&lt;-</span> <span class="n">that</span>
-  <span class="o">}</span> <span class="k">yield</span> <span class="n">f</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">)</span>
+  def map2(that: Bit4)(f: (Short, Short) =&gt; Short): Bit4 = for {
+    a &lt;- this
+    b &lt;- that
+  } yield f(a, b)
 
-  <span class="k">def</span> <span class="o">|^|(</span><span class="n">that</span><span class="k">:</span> <span class="kt">Bit4</span><span class="o">)</span><span class="k">:</span> <span class="kt">Bit4</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="n">map2</span><span class="o">(</span><span class="n">that</span><span class="o">)(</span><span class="k">_</span> <span class="o">^</span> <span class="k">_</span> <span class="n">toShort</span><span class="o">)</span>
+  def |^|(that: Bit4): Bit4 = this.map2(that)(_ ^ _ toShort)
 
-  <span class="k">def</span> <span class="n">toBits</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Bit</span><span class="o">]</span> <span class="k">=</span> <span class="o">(</span><span class="mi">1</span> <span class="n">to</span> <span class="mi">4</span><span class="o">).</span><span class="n">map</span><span class="o">(</span><span class="k">this</span> <span class="o">(</span><span class="k">_</span><span class="o">)).</span><span class="n">toArray</span>
+  def toBits: Array[Bit] = (1 to 4).map(this (_)).toArray
 
-  <span class="k">def</span> <span class="n">binary</span> <span class="k">=</span> <span class="n">intTo8BitString</span><span class="o">(</span><span class="n">value</span><span class="o">)</span> <span class="n">drop</span> <span class="mi">4</span>
+  def binary = intTo8BitString(value) drop 4
 
-  <span class="k">def</span> <span class="n">concat</span><span class="o">(</span><span class="n">that</span><span class="k">:</span> <span class="kt">Bit4</span><span class="o">)</span><span class="k">:</span> <span class="kt">Bit8</span> <span class="o">=</span> <span class="nc">Bit8</span><span class="o">(((</span><span class="k">this</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="o">)</span> <span class="o">|</span> <span class="o">(</span><span class="n">that</span><span class="o">.</span><span class="n">value</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="o">)).</span><span class="n">toByte</span><span class="o">)</span>
+  def concat(that: Bit4): Bit8 = Bit8(((this.value &lt;&lt; 4) | (that.value &amp; 0xF)).toByte)
 
-  <span class="k">override</span> <span class="k">def</span> <span class="n">equals</span><span class="o">(</span><span class="n">o</span><span class="k">:</span> <span class="kt">scala.Any</span><span class="o">)</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="n">o</span> <span class="k">match</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="n">x</span><span class="k">:</span> <span class="kt">Bit4</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span>
-    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="kc">false</span>
-  <span class="o">}</span>
-<span class="o">}</span>
-</pre></div>
-
-</div>
+  override def equals(o: scala.Any): Boolean = o match {
+    case x: Bit4 =&gt; this.value == x.value
+    case _ =&gt; false
+  }
+}</code></pre></div>
 
 <p>I have just made two auxiliary constructors for creating a Bit4 by passing a binary string (e.g Bit4(&ldquo;0010&rdquo;)) or by passing an array of bits. I also made the class a <em><strong>case class</strong></em> and added an <code>apply</code> method. Without the case class (or a companion object) you would have to write <code>new Bit4(4)</code> when creating instances. What Scala allows with case classes is to remove the need for the <code>new</code> keyword. We can simply write <code>Bit4(10)</code> and create instances throughout the code base. The way the <code>apply</code> method is implemented allows for this kind of syntax:</p>
 
 <div class="brush: scala">
- <div class="source">
-  <pre><span></span><span class="n">scala</span><span class="o">&gt;</span> <span class="k">val</span> <span class="n">num</span> <span class="k">=</span> <span class="n">sdes</span><span class="o">.</span><span class="nc">Bit4</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
-<span class="n">num</span><span class="k">:</span> <span class="kt">sdes.Bit4</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">(</span><span class="mi">0</span><span class="n">b0100</span><span class="o">)</span>
+ <pre><code>scala&gt; val num = sdes.Bit4(4)
+num: sdes.Bit4 = 4 (0b0100)
 
-<span class="n">scala</span><span class="o">&gt;</span> <span class="n">num</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
-<span class="n">res0</span><span class="k">:</span> <span class="kt">sdes.Bit</span> <span class="o">=</span> <span class="mi">1</span>
-</pre></div>
-
-</div>
+scala&gt; num(2)
+res0: sdes.Bit = 1</code></pre></div>
 
 <p>Because many times, during the execution of the algorithm we need to extract a certain bit out of the binary number, this method allows as to do so easily. For instance, if we want to get the second bit as in the above example (counting from the MSB) we just need to call <code>num(2)</code> and we will get <code>1</code> as expected. We could have easily made a method called <code>getBit(n: Int): Bit</code>, but to me, the usage of apply here makes the Bit4 class a seem more like a list of bits.</p>
 
@@ -256,65 +232,49 @@
 <p>In order to test the performance, I had to make some changes and the main such change was made to the |^| function (the <code>concat</code> and <code>split</code> functions also needed to be changed, but you can check them out yourself).</p>
 
 <div class="brush: scala">
- <div class="source">
-  <pre><span></span>  <span class="c1">// ....</span>
+ <pre><code>  // ....
 
-  <span class="k">lazy</span> <span class="k">val</span> <span class="n">bvalue</span> <span class="k">=</span> <span class="n">toBits</span>
+  lazy val bvalue = toBits
 
-  <span class="k">def</span> <span class="o">|^|(</span><span class="n">that</span><span class="k">:</span> <span class="kt">Bit4</span><span class="o">)</span><span class="k">:</span> <span class="kt">Bit4</span> <span class="o">=</span>
-    <span class="nc">Bit4</span><span class="o">((</span><span class="k">this</span><span class="o">.</span><span class="n">bvalue</span> <span class="n">zip</span> <span class="n">that</span><span class="o">.</span><span class="n">bvalue</span><span class="o">).</span><span class="n">map</span><span class="o">{</span>
-      <span class="k">case</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">)</span> <span class="k">=&gt;</span>  <span class="nc">Bit</span><span class="o">((</span><span class="n">a</span><span class="o">.</span><span class="n">value</span> <span class="o">^</span> <span class="n">b</span><span class="o">.</span><span class="n">value</span><span class="o">).</span><span class="n">toByte</span><span class="o">)</span>
-    <span class="o">})</span>
+  def |^|(that: Bit4): Bit4 =
+    Bit4((this.bvalue zip that.bvalue).map{
+      case (a, b) =&gt;  Bit((a.value ^ b.value).toByte)
+    })
 
-  <span class="c1">// ...</span>
-</pre></div>
-
-</div>
+  // ...</code></pre></div>
 
 <p>I ran the following code using Scalameter</p>
 
 <div class="brush: scala">
- <div class="source">
-  <pre><span></span><span class="k">import</span> <span class="nn">org.scalameter.api._</span>
+ <pre><code>import org.scalameter.api._
 
-<span class="k">object</span> <span class="nc">RangeBenchmark</span> <span class="k">extends</span> <span class="nc">Bench</span><span class="o">.</span><span class="nc">ForkedTime</span> <span class="o">{</span>
-  <span class="k">val</span> <span class="n">ranges</span> <span class="k">=</span> <span class="k">for</span> <span class="o">{</span>
-    <span class="n">size</span> <span class="k">&lt;-</span> <span class="nc">Gen</span><span class="o">.</span><span class="n">range</span><span class="o">(</span><span class="s">"size"</span><span class="o">)(</span><span class="mi">1000</span><span class="o">,</span> <span class="mi">2000</span><span class="o">,</span> <span class="mi">100</span><span class="o">)</span>
-  <span class="o">}</span> <span class="k">yield</span> <span class="mi">0</span> <span class="n">until</span> <span class="n">size</span>
+object RangeBenchmark extends Bench.ForkedTime {
+  val ranges = for {
+    size &lt;- Gen.range("size")(1000, 2000, 100)
+  } yield 0 until size
 
-  <span class="k">val</span> <span class="n">encdec</span> <span class="k">=</span> <span class="n">sdes</span><span class="o">.</span><span class="nc">SDES</span><span class="o">(</span><span class="mi">12</span><span class="o">)</span>
+  val encdec = sdes.SDES(12)
 
-  <span class="k">val</span> <span class="n">m</span> <span class="k">=</span> <span class="n">measure</span> <span class="n">method</span> <span class="s">"encrypt/decrypt"</span> <span class="n">in</span> <span class="o">{</span>
-    <span class="n">using</span><span class="o">(</span><span class="n">ranges</span><span class="o">)</span> <span class="n">in</span> <span class="o">{</span>
-      <span class="k">_</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">el</span> <span class="k">=&gt;</span> <span class="n">encdec</span><span class="o">.</span><span class="n">decryptByte</span><span class="o">(</span><span class="n">encdec</span><span class="o">.</span><span class="n">encryptByte</span><span class="o">(</span><span class="n">el</span><span class="o">.</span><span class="n">toByte</span><span class="o">)))</span>
-    <span class="o">}</span>
-  <span class="o">}</span>
-<span class="o">}</span>
-</pre></div>
-
-</div>
+  val m = measure method "encrypt/decrypt" in {
+    using(ranges) in {
+      _.map(el =&gt; encdec.decryptByte(encdec.encryptByte(el.toByte)))
+    }
+  }
+}</code></pre></div>
 
 <p>The results in milliseconds rounded to the nearest integer are given below:</p>
 
 <div class="brush: scala">
- <div class="source">
-  <pre><span></span><span class="c1">// xor with array</span>
-<span class="k">val</span> <span class="n">xor_ar</span> <span class="k">=</span> <span class="nc">Array</span><span class="o">(</span><span class="mi">45</span><span class="o">,</span> <span class="mi">51</span><span class="o">,</span> <span class="mi">55</span><span class="o">,</span> <span class="mi">59</span><span class="o">,</span> <span class="mi">64</span><span class="o">,</span> <span class="mi">68</span><span class="o">,</span> <span class="mi">73</span><span class="o">,</span> <span class="mi">80</span><span class="o">,</span> <span class="mi">91</span><span class="o">,</span> <span class="mi">96</span><span class="o">,</span> <span class="mi">99</span><span class="o">)</span>
+ <pre><code>// xor with array
+val xor_ar = Array(45, 51, 55, 59, 64, 68, 73, 80, 91, 96, 99)
 
-<span class="c1">//xor native</span>
-<span class="k">val</span> <span class="n">xor_nt</span> <span class="k">=</span> <span class="nc">Array</span><span class="o">(</span><span class="mi">20</span><span class="o">,</span> <span class="mi">26</span><span class="o">,</span> <span class="mi">28</span><span class="o">,</span> <span class="mi">30</span><span class="o">,</span> <span class="mi">32</span><span class="o">,</span> <span class="mi">34</span><span class="o">,</span> <span class="mi">36</span><span class="o">,</span> <span class="mi">39</span><span class="o">,</span> <span class="mi">41</span><span class="o">,</span> <span class="mi">43</span><span class="o">,</span> <span class="mi">45</span><span class="o">)</span>
-</pre></div>
-
-</div>
+//xor native
+val xor_nt = Array(20, 26, 28, 30, 32, 34, 36, 39, 41, 43, 45)</code></pre></div>
 
 <p>The average speedup is:</p>
 
 <div class="brush: scala">
- <div class="source">
-  <pre><span></span><span class="o">(</span><span class="n">xor_ar</span> <span class="n">zip</span> <span class="n">xor_nt</span><span class="o">).</span><span class="n">map</span><span class="o">{</span> <span class="k">case</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">n</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="mf">1.0</span><span class="o">*</span><span class="n">a</span><span class="o">/</span><span class="n">n</span> <span class="o">}.</span><span class="n">sum</span> <span class="o">/</span> <span class="n">xor_ar</span><span class="o">.</span><span class="n">length</span>
-</pre></div>
-
-</div>
+ <pre><code>(xor_ar zip xor_nt).map{ case(a, n) =&gt; 1.0*a/n }.sum / xor_ar.length</code></pre></div>
 
 <p>which comes out as <strong>~2x.</strong></p>
 

@@ -10,7 +10,7 @@
     <meta name="keywords" content="dpdk, c, ip">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/favicon.ico">
-    <link rel="canonical" href="http://billpcs.github.io/2019/05/an-intro-to-dpdk-for-mortals.html"> <link rel="next" href="/2018/03/sdes-in-scala.html"> 
+    <link rel="canonical" href="http://billpcs.github.io/2019/05/an-intro-to-dpdk-for-mortals.html"> <link rel="next" href="/2018/03/sdes-in-scala.html"> <link rel="prev" href="/2020/10/i-don-t-want-to-write-a-program.html">
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/css/pygments.css">
@@ -50,7 +50,7 @@
                   </a>
 
                   <div class="dropdown-menu">
-                    <a class="dropdown-item" href="/tags/c.html">c</a><a class="dropdown-item" href="/tags/cryptography.html">cryptography</a><a class="dropdown-item" href="/tags/dpdk.html">dpdk</a><a class="dropdown-item" href="/tags/ip.html">ip</a><a class="dropdown-item" href="/tags/python.html">python</a><a class="dropdown-item" href="/tags/scala.html">scala</a><a class="dropdown-item" href="/tags/theory.html">theory</a>
+                    <a class="dropdown-item" href="/tags/bash.html">bash</a><a class="dropdown-item" href="/tags/c.html">c</a><a class="dropdown-item" href="/tags/cryptography.html">cryptography</a><a class="dropdown-item" href="/tags/dpdk.html">dpdk</a><a class="dropdown-item" href="/tags/ip.html">ip</a><a class="dropdown-item" href="/tags/python.html">python</a><a class="dropdown-item" href="/tags/scala.html">scala</a><a class="dropdown-item" href="/tags/theory.html">theory</a>
                   </div>
                 </li>
 
@@ -163,25 +163,21 @@ Nmap done: 256 IP addresses (4 hosts up) scanned in 3.15 seconds</code></pre>
 <p>In order to make your life easier for what is to follow, you should edit the <code>/etc/network/interfaces</code> file for each machine. Here is what it should look like:</p>
 
 <div class="brush: bash">
- <div class="source">
-  <pre><span></span><span class="c1"># The loopback network interface</span>
+ <pre><code># The loopback network interface
 auto lo
 iface lo inet loopback
 
-<span class="c1"># The dpdk-looking interface</span>
+# The dpdk-looking interface
 auto enp0s3
 allow-hotplug enp0s3
 iface enp0s3 inet static
         address 172.16.1.22
         netmask 255.255.255.0
 
-<span class="c1"># The internet-looking interface</span>
+# The internet-looking interface
 auto enp0s8
 allow-hotplug enp0s8
-iface enp0s8 inet dhcp        
-</pre></div>
-
-</div>
+iface enp0s8 inet dhcp        </code></pre></div>
 
 <p>Since there is a non-zero chance that the names of the interfaces will differ in your case, change them accordingly. (<code>ip link show</code> may help to find out their names). This configuration will tell the first adapter (<code>enp0s3</code>, the one we will use for DPDK) to have a static IP. Notice that we can choose whatever we like as an IP for this interface because the network created with <code>enp0s3</code> will be local and cut out from the rest of the world. Thus, you could have chosen anything, for example <code>122.122.122.122</code> or <code>10.12.13.14</code>. It doesn&rsquo;t matter (as long as you set the subnet mask correctly). This configuration will also tell your second network adapter (<code>enp0s8</code>, the one bridged with your computer&rsquo;s interface) to request an IP using DHCP. In this way every time you boot the VM, the interfaces will automatically be assigned IP&rsquo;s.</p>
 
@@ -194,24 +190,16 @@ iface enp0s8 inet dhcp
 <p>Because I find having to work with terminal environments in VirtualBox cumbersome, I prefer to install openssh-server and connect to every VM from my terminal. This is very simple to do if you want to:</p>
 
 <div class="brush: sh">
- <div class="source">
-  <pre><span></span><span class="c1"># in your VM (e.g alice)</span>
+ <pre><code># in your VM (e.g alice)
 $ sudo apt install openssh-server
 
-<span class="c1"># in your host, to connect to alice (IP may differ)</span>
-$ ssh alice@192.168.1.16
-</pre></div>
-
-</div>
+# in your host, to connect to alice (IP may differ)
+$ ssh alice@192.168.1.16</code></pre></div>
 
 <div class="brush: sh">
- <div class="source">
-  <pre><span></span><span class="c1"># and now you can do everything from here!</span>
-Last login: Thu May <span class="m">16</span> 16:38:46 2019
-alice@alice:~$
-</pre></div>
-
-</div>
+ <pre><code># and now you can do everything from here!
+Last login: Thu May 16 16:38:46 2019
+alice@alice:~$</code></pre></div>
 
 <h2 id="setting-up-the-switch">Setting up the switch</h2>
 
@@ -220,11 +208,7 @@ alice@alice:~$
 <p>As you may have guessed we will use Open vSwitch. Let&rsquo;s install it first. On Ubuntu based distributions this is done like so:</p>
 
 <div class="brush: bash">
- <div class="source">
-  <pre><span></span>sudo apt install openvswitch-switch
-</pre></div>
-
-</div>
+ <pre><code>sudo apt install openvswitch-switch</code></pre></div>
 
 <p>but on other distributions you may have to use another package manager. You can consider installing it from source too! (more info <a href="http://www.openvswitch.org/">here</a>)</p>
 
@@ -251,44 +235,28 @@ alice@alice:~$
  <li>Let&rsquo;s start by creating a bridge. It&rsquo;s as simple as that:</li></ul>
 
 <div class="brush: bash">
- <div class="source">
-  <pre><span></span> sudo ovs-vsctl add-br br0
-</pre></div>
-
-</div>
+ <pre><code> sudo ovs-vsctl add-br br0</code></pre></div>
 
 <ul>
  <li>Then create two TAP (<a href="https://www.saminiir.com/openvpn-puts-packets-inside-your-packets/#tuntap-devices">link here</a>) interfaces, one for Alice and one for Bob</li></ul>
 
 <div class="brush: bash">
- <div class="source">
-  <pre><span></span>sudo ip tuntap add mode tap vnet-alice
-sudo ip tuntap add mode tap vnet-bob
-</pre></div>
-
-</div>
+ <pre><code>sudo ip tuntap add mode tap vnet-alice
+sudo ip tuntap add mode tap vnet-bob</code></pre></div>
 
 <ul>
  <li>Bring them up</li></ul>
 
 <div class="brush: bash">
- <div class="source">
-  <pre><span></span>sudo ip link <span class="nb">set</span> vnet-alice up
-sudo ip link <span class="nb">set</span> vnet-bob up
-</pre></div>
-
-</div>
+ <pre><code>sudo ip link set vnet-alice up
+sudo ip link set vnet-bob up</code></pre></div>
 
 <ul>
  <li>And then add them to the bridge <code>br0</code> as ports</li></ul>
 
 <div class="brush: bash">
- <div class="source">
-  <pre><span></span>sudo ovs-vsctl add-port br0 vnet-alice
-sudo ovs-vsctl add-port br0 vnet-bob
-</pre></div>
-
-</div>
+ <pre><code>sudo ovs-vsctl add-port br0 vnet-alice
+sudo ovs-vsctl add-port br0 vnet-bob</code></pre></div>
 
 <p>So here is what we essentially get with the above configuration:</p>
 
@@ -319,38 +287,30 @@ sudo ovs-vsctl add-port br0 vnet-bob
 <p>On the host:</p>
 
 <div class="brush: bash">
- <div class="source">
-  <pre><span></span>sudo ip tuntap add mode tap vnet-proxy
-sudo ip link <span class="nb">set</span> vnet-proxy up
-sudo ovs-vsctl add-port br0 vnet-proxy
-</pre></div>
-
-</div>
+ <pre><code>sudo ip tuntap add mode tap vnet-proxy
+sudo ip link set vnet-proxy up
+sudo ovs-vsctl add-port br0 vnet-proxy</code></pre></div>
 
 <p>On the VM:</p>
 
 <div class="brush: bash">
- <div class="source">
-  <pre><span></span><span class="c1"># edit /etc/network/interfaces</span>
+ <pre><code># edit /etc/network/interfaces
 
-<span class="c1"># The loopback network interface</span>
+# The loopback network interface
 auto lo
 iface lo inet loopback
 
-<span class="c1"># The dpdk-looking interface</span>
+# The dpdk-looking interface
 auto enp0s3
 allow-hotplug enp0s3
 iface enp0s3 inet static
         address 172.16.1.66
         netmask 255.255.255.0
 
-<span class="c1"># The internet-looking interface</span>
+# The internet-looking interface
 auto enp0s8
 allow-hotplug enp0s8
-iface enp0s8 inet dhcp        
-</pre></div>
-
-</div>
+iface enp0s8 inet dhcp        </code></pre></div>
 
 <p>On the Proxy Virtual Box Network Settings, set the first adapter to connect to <code>vnet-proxy</code> and the second one to your network, just like we did before.</p>
 
@@ -359,11 +319,7 @@ iface enp0s8 inet dhcp
 <p>To see some more information on the bridge and its various ports we can issue the command</p>
 
 <div class="brush: bash">
- <div class="source">
-  <pre><span></span>sudo ovs-ofctl show br0
-</pre></div>
-
-</div>
+ <pre><code>sudo ovs-ofctl show br0</code></pre></div>
 
 <p>in my case the output is</p>
 
@@ -402,16 +358,12 @@ OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0</code></pre>
 <p>Let&rsquo;s add some rules then. These rules will modify the switch in such a way that every packet will reach the Proxy too.</p>
 
 <div class="brush: bash">
- <div class="source">
-  <pre><span></span><span class="c1"># delete old rules</span>
+ <pre><code># delete old rules
 sudo ovs-ofctl del-flows br0
-<span class="c1"># anything sent to Alice must be forwarded to both vnet-proxy and vnet-alice</span>
-sudo ovs-ofctl add-flow br0 <span class="nv">in_port</span><span class="o">=</span><span class="s2">"vnet-alice"</span>,actions<span class="o">=</span>output:<span class="s2">"vnet-proxy"</span>,normal
-<span class="c1"># anything sent to Bob must be forwarded to both vnet-proxy and vnet-bob</span>
-sudo ovs-ofctl add-flow br0 <span class="nv">in_port</span><span class="o">=</span><span class="s2">"vnet-bob"</span>,actions<span class="o">=</span>output:<span class="s2">"vnet-proxy"</span>,normal
-</pre></div>
-
-</div>
+# anything sent to Alice must be forwarded to both vnet-proxy and vnet-alice
+sudo ovs-ofctl add-flow br0 in_port="vnet-alice",actions=output:"vnet-proxy",normal
+# anything sent to Bob must be forwarded to both vnet-proxy and vnet-bob
+sudo ovs-ofctl add-flow br0 in_port="vnet-bob",actions=output:"vnet-proxy",normal</code></pre></div>
 
 <h2 id="dpdk-to-the-rescue">DPDK to the rescue</h2>
 
@@ -420,17 +372,13 @@ sudo ovs-ofctl add-flow br0 <span class="nv">in_port</span><span class="o">=</sp
 <p>We will now get the DPDK sources, compile the project and modify our network card so that we can run DPDK code on it. For this, boot PC-Proxy and issue these commands.</p>
 
 <div class="brush: bash">
- <div class="source">
-  <pre><span></span>sudo apt install -y make gcc libnuma-dev build-essential python pkg-config
+ <pre><code>sudo apt install -y make gcc libnuma-dev build-essential python pkg-config
 
 wget https://fast.dpdk.org/rel/dpdk-18.05.1.tar.xz
 
 tar xf dpdk-18.05.1.tar.xz
 
-mv dpdk-stable-18.05.1 dpdk
-</pre></div>
-
-</div>
+mv dpdk-stable-18.05.1 dpdk</code></pre></div>
 
 <p>There are a few more steps before we can really start the development cycle. We have to set up everything the way DPDK wants it to be in order to work. Luckily, DPDK has bundled in some useful scripts so that we don&rsquo;t have to reinvent the wheel. Navigate to <code>dpdk/usertools/</code> and look for the file called <code>dpdk-setup.py</code>. The name of the file does not lie, it will indeed help us set it up.</p>
 
@@ -468,25 +416,22 @@ mv dpdk-stable-18.05.1 dpdk
 <p>It is during this function call that packets are &ldquo;received&rdquo; and can be &ldquo;sent&rdquo;. One of the ways DPDK can take data from the wire is the function <code>rte_eth_rx_burst()</code> which when called fills in a buffer of packets. The buffer can be thought of as a chunk of memory where the packets reside after the call. It returns the number of packets that where eventually received. So then <code>buf[0]</code> is the first packet, <code>buf[1]</code> is the second, and so on. This buffer excepts that the data that were indeed in the wire, contain some metadata. So in order to reach the point where the real data are, we can use a function DPDK conveniently provides just for this purpose. This is <code>rte_pktmbuf_mtod</code>. Here is how it works</p>
 
 <div class="brush: c">
- <div class="source">
-  <pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;rte_ip.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;rte_tcp.h&gt;</span><span class="cp"></span>
+ <pre><code>#include &lt;rte_ip.h&gt;
+#include &lt;rte_tcp.h&gt;
 
-<span class="c1">// fill in the buffer</span>
-<span class="k">const</span> <span class="kt">uint16_t</span> <span class="n">nb_rx</span> <span class="o">=</span> <span class="n">rte_eth_rx_burst</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bufs</span><span class="p">,</span> <span class="n">BURST_SIZE</span><span class="p">);</span>
-<span class="c1">// now bufs is an array (of length nb_rx) of packets together with their metadata</span>
+// fill in the buffer
+const uint16_t nb_rx = rte_eth_rx_burst(port, 0, bufs, BURST_SIZE);
+// now bufs is an array (of length nb_rx) of packets together with their metadata
 
-<span class="c1">// take the first packet and make eth point to the start of the Ethernet frame</span>
-<span class="k">struct</span> <span class="n">ether_hdr</span> <span class="o">*</span><span class="n">eth</span> <span class="o">=</span> <span class="n">rte_pktmbuf_mtod</span><span class="p">(</span><span class="n">bufs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="k">struct</span> <span class="n">ether_hdr</span><span class="o">*</span><span class="p">);</span>
+// take the first packet and make eth point to the start of the Ethernet frame
+struct ether_hdr *eth = rte_pktmbuf_mtod(bufs[0], struct ether_hdr*);
 
-<span class="c1">// to reach the ip header, it is much simpler, just some pointer arithmetic</span>
-<span class="k">struct</span> <span class="n">ipv4_hdr</span> <span class="o">*</span><span class="n">ip</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">ipv4_hdr</span><span class="o">*</span><span class="p">)(</span><span class="n">eth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+// to reach the ip header, it is much simpler, just some pointer arithmetic
+struct ipv4_hdr *ip = (struct ipv4_hdr*)(eth + 1);
 
-<span class="c1">// the same to reach the tcp header</span>
-<span class="k">struct</span> <span class="n">tcp_hdr</span> <span class="o">*</span><span class="n">tcp</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">tcp_hdr</span><span class="o">*</span><span class="p">)(</span><span class="n">ip</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-</pre></div>
-
-</div>
+// the same to reach the tcp header
+struct tcp_hdr *tcp = (struct tcp_hdr*)(ip + 1);
+</code></pre></div>
 
 <p>Now that we know how to get hold of the packets, let&rsquo;s start editing.</p>
 
@@ -495,24 +440,16 @@ mv dpdk-stable-18.05.1 dpdk
 <p>For our purposes we don&rsquo;t care if the number of available ports is even or odd. We just need one! The one port that receives the packets. So remove</p>
 
 <div class="brush: c">
- <div class="source">
-  <pre><span></span><span class="k">if</span> <span class="p">(</span><span class="n">nb_ports</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">||</span> <span class="p">(</span><span class="n">nb_ports</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="n">rte_exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span> <span class="s">"Error: number of ports must be even</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
-</pre></div>
-
-</div>
+ <pre><code>if (nb_ports &lt; 2 || (nb_ports &amp; 1))
+        rte_exit(EXIT_FAILURE, "Error: number of ports must be even\n");</code></pre></div>
 
 <h3 id="remove-the-txburst">Remove: the &lsquo;tx_burst&rsquo;</h3>
 
 <p>We don&rsquo;t want to send anything, we just want to capture packets. (You could however, and wreck havoc on your network. You would essentially duplicate each received frame). So remove</p>
 
 <div class="brush: c">
- <div class="source">
-  <pre><span></span><span class="cm">/* Send burst of TX packets, to second port of pair. */</span>
-<span class="k">const</span> <span class="kt">uint16_t</span> <span class="n">nb_tx</span> <span class="o">=</span> <span class="n">rte_eth_tx_burst</span><span class="p">(</span><span class="n">port</span> <span class="o">^</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bufs</span><span class="p">,</span> <span class="n">nb_rx</span><span class="p">);</span>
-</pre></div>
-
-</div>
+ <pre><code>/* Send burst of TX packets, to second port of pair. */
+const uint16_t nb_tx = rte_eth_tx_burst(port ^ 1, 0, bufs, nb_rx);</code></pre></div>
 
 <pre><code>Note:
   In network code, TX is used to mean Transmit and RX to mean Receive</code></pre>
@@ -522,13 +459,9 @@ mv dpdk-stable-18.05.1 dpdk
 <p>A check is made in order to see if some packets were not transmitted, and if that is true to free them. Given that this will always be the case in our example, there is no need to test for it. (we only remove the outer <code>if</code>, we still want to free the buffers in the <code>for</code> loop)</p>
 
 <div class="brush: c">
- <div class="source">
-  <pre><span></span><span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="n">nb_tx</span> <span class="o">&lt;</span> <span class="n">nb_rx</span><span class="p">))</span> <span class="p">{</span>
-    <span class="p">...</span>
-<span class="p">}</span>
-</pre></div>
-
-</div>
+ <pre><code>if (unlikely(nb_tx &lt; nb_rx)) {
+    ...
+}</code></pre></div>
 
 <p>At this point we are free to write our code.</p>
 
@@ -537,17 +470,13 @@ mv dpdk-stable-18.05.1 dpdk
 <p>Usually my first step in writing code is to create a function that will return some visual queues to see if everything is normal. In this case my first step was to create a function to print the MAC address. When I receive a packet I send the Source and Destination MAC address to this function. That way I can clearly see if I am getting the frames I am supposed to when executing the program. After all, what is a packet capturing utility without seeing some MAC addresses?</p>
 
 <div class="brush: c">
- <div class="source">
-  <pre><span></span><span class="kt">void</span> <span class="nf">print_mac</span><span class="p">(</span><span class="k">struct</span> <span class="n">ether_addr</span> <span class="n">addr</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\t</span><span class="s">%02"</span> <span class="n">PRIx8</span> <span class="s">" %02"</span> <span class="n">PRIx8</span> <span class="s">" %02"</span> <span class="n">PRIx8</span>
-               <span class="s">" %02"</span> <span class="n">PRIx8</span> <span class="s">" %02"</span> <span class="n">PRIx8</span> <span class="s">" %02"</span> <span class="n">PRIx8</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
-            <span class="n">addr</span><span class="p">.</span><span class="n">addr_bytes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">addr</span><span class="p">.</span><span class="n">addr_bytes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-            <span class="n">addr</span><span class="p">.</span><span class="n">addr_bytes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">addr</span><span class="p">.</span><span class="n">addr_bytes</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
-            <span class="n">addr</span><span class="p">.</span><span class="n">addr_bytes</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">addr</span><span class="p">.</span><span class="n">addr_bytes</span><span class="p">[</span><span class="mi">5</span><span class="p">]);</span>
-<span class="p">}</span>
-</pre></div>
-
-</div>
+ <pre><code>void print_mac(struct ether_addr addr) {
+        printf("\t%02" PRIx8 " %02" PRIx8 " %02" PRIx8
+               " %02" PRIx8 " %02" PRIx8 " %02" PRIx8 "\n",
+            addr.addr_bytes[0], addr.addr_bytes[1],
+            addr.addr_bytes[2], addr.addr_bytes[3],
+            addr.addr_bytes[4], addr.addr_bytes[5]);
+}</code></pre></div>
 
 <p>This function takes as a parameter a structure <code>struct ether_addr</code> that is <a href="https://doc.dpdk.org/api/structether__hdr.html">defined</a> in the DPDK API. It contains the Destination and Source MAC addresses and the Ethernet Type. We can simply call it as <code>print_mac(eth-&gt;d_addr)</code> to print out the destination address.</p>
 
@@ -556,37 +485,29 @@ mv dpdk-stable-18.05.1 dpdk
 <p>MAC addresses are good, but IP addresses are even better. Here is a function to print them.</p>
 
 <div class="brush: c">
- <div class="source">
-  <pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;arpa/inet.h&gt;</span><span class="cp"></span>
+ <pre><code>#include &lt;arpa/inet.h&gt;
 
-<span class="kt">void</span> <span class="nf">print_ip</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">ipn</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kt">uint8_t</span> <span class="n">bytes</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
-    <span class="kt">uint32_t</span> <span class="n">ip</span> <span class="o">=</span> <span class="n">ntohl</span><span class="p">(</span><span class="n">ipn</span><span class="p">);</span>
-    <span class="n">bytes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ip</span> <span class="o">&gt;&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">;</span>
-    <span class="n">bytes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ip</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">;</span>
-    <span class="n">bytes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ip</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">;</span>
-    <span class="n">bytes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ip</span> <span class="o">&gt;&gt;</span> <span class="mi">24</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">;</span>
+void print_ip(uint32_t ipn) {
+    uint8_t bytes[4];
+    uint32_t ip = ntohl(ipn);
+    bytes[0] = (ip &gt;&gt; 0) &amp; 0xFF;
+    bytes[1] = (ip &gt;&gt; 8) &amp; 0xFF;
+    bytes[2] = (ip &gt;&gt; 16) &amp; 0xFF;
+    bytes[3] = (ip &gt;&gt; 24) &amp; 0xFF;
 
-    <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\t</span><span class="s">%d.%d.%d.%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">bytes</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">bytes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bytes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bytes</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
-<span class="p">}</span>
-</pre></div>
-
-</div>
+    printf("\t%d.%d.%d.%d\n", bytes[3], bytes[2], bytes[1], bytes[0]);
+}</code></pre></div>
 
 <h3 id="add-the-hexdump-capability">Add: the &lsquo;hexdump&rsquo; capability</h3>
 
 <p>DPDK has a built-in function to print hexdumps. It is a nice feature to have in a packet capturer. The only thing we need to do is to include the header and then the function becomes available to us.</p>
 
 <div class="brush: c">
- <div class="source">
-  <pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;rte_hexdump.h&gt;</span><span class="cp"></span>
+ <pre><code>#include &lt;rte_hexdump.h&gt;
 
-<span class="p">...</span>
+...
 
-<span class="n">rte_hexdump</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="kt">void</span><span class="o">*</span><span class="p">)</span> <span class="n">data</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
-</pre></div>
-
-</div>
+rte_hexdump(stdout, NULL, (const void*) data, 30)</code></pre></div>
 
 <p>At this point we have everything we need to make an elementary packet capture utility.</p>
 
@@ -649,7 +570,9 @@ dproxy@proxy:~/dpdk/examples/skeleton$
     </div>
     <footer>
         <ul class="pager">
-
+        <li class="previous">
+          <a href="/2020/10/i-don-t-want-to-write-a-program.html">&larr; <em>I don&rsquo;t want to write a program</em></a>
+        </li>
         <li class="next">
           <a href="/2018/03/sdes-in-scala.html"><em>SDES in Scala</em> &rarr;</a>
         </li>

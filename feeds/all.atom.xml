@@ -4,7 +4,17 @@
  <link rel="self" href="http://billpcs.github.io/feeds/all.atom.xml" />
  <link href="http://billpcs.github.io/index.html" />
  <id>urn:http-billpcs-github-io:-index-html</id>
- <updated>2019-05-16T17:17:15Z</updated>
+ <updated>2020-10-27T20:26:34Z</updated>
+ <entry>
+  <title type="text">I don't want to write a program</title>
+  <link rel="alternate" href="http://billpcs.github.io/2020/10/i-don-t-want-to-write-a-program.html?utm_source=all&amp;utm_medium=Atom" />
+  <id>urn:http-billpcs-github-io:-2020-10-i-don-t-want-to-write-a-program-html</id>
+  <published>2020-10-27T20:26:34Z</published>
+  <updated>2020-10-27T20:26:34Z</updated>
+  <author>
+   <name>bill</name></author>
+  <content type="html">
+&lt;p&gt;It was one of those times, I did not want to write a program to parse another program&amp;rsquo;s output. I was alright Googling around for &lt;code&gt;bash&lt;/code&gt; stuff for 10 minutes or so. Here is what I came up with.&lt;/p&gt;&lt;a href="http://billpcs.github.io/2020/10/i-don-t-want-to-write-a-program.html?utm_source=all&amp;amp;utm_medium=Atom"&gt;&lt;em&gt;More&amp;hellip;&lt;/em&gt;&lt;/a&gt;</content></entry>
  <entry>
   <title type="text">An intro to DPDK for mortals</title>
   <link rel="alternate" href="http://billpcs.github.io/2019/05/an-intro-to-dpdk-for-mortals.html?utm_source=all&amp;utm_medium=Atom" />

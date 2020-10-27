@@ -4,9 +4,17 @@
   <title>The Random Blog: The Random Blog</title>
   <description>The Random Blog: The Random Blog</description>
   <link>http://billpcs.github.io/index.html</link>
-  <lastBuildDate>Thu, 16 May 2019 17:17:15 UT</lastBuildDate>
-  <pubDate>Thu, 16 May 2019 17:17:15 UT</pubDate>
+  <lastBuildDate>Tue, 27 Oct 2020 20:26:34 UT</lastBuildDate>
+  <pubDate>Tue, 27 Oct 2020 20:26:34 UT</pubDate>
   <ttl>1800</ttl>
+  <item>
+   <title>I don't want to write a program</title>
+   <link>http://billpcs.github.io/2020/10/i-don-t-want-to-write-a-program.html?utm_source=all&amp;utm_medium=RSS</link>
+   <guid isPermaLink="false">urn:http-billpcs-github-io:-2020-10-i-don-t-want-to-write-a-program-html</guid>
+   <pubDate>Tue, 27 Oct 2020 20:26:34 UT</pubDate>
+   <author>bill</author>
+   <description>
+&lt;p&gt;It was one of those times, I did not want to write a program to parse another program&amp;rsquo;s output. I was alright Googling around for &lt;code&gt;bash&lt;/code&gt; stuff for 10 minutes or so. Here is what I came up with.&lt;/p&gt;&lt;a href="http://billpcs.github.io/2020/10/i-don-t-want-to-write-a-program.html?utm_source=all&amp;amp;utm_medium=RSS"&gt;&lt;em&gt;More&amp;hellip;&lt;/em&gt;&lt;/a&gt;</description></item>
   <item>
    <title>An intro to DPDK for mortals</title>
    <link>http://billpcs.github.io/2019/05/an-intro-to-dpdk-for-mortals.html?utm_source=all&amp;utm_medium=RSS</link>
