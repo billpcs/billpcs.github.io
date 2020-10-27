@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<rss version="2.0">
+ <channel>
+  <title>The Random Blog: Posts tagged 'bash'</title>
+  <description>The Random Blog: Posts tagged 'bash'</description>
+  <link>http://billpcs.github.io/tags/bash.html</link>
+  <lastBuildDate>Tue, 27 Oct 2020 20:26:34 UT</lastBuildDate>
+  <pubDate>Tue, 27 Oct 2020 20:26:34 UT</pubDate>
+  <ttl>1800</ttl>
+  <item>
+   <title>I don't want to write a program</title>
+   <link>http://billpcs.github.io/2020/10/i-don-t-want-to-write-a-program.html?utm_source=bash&amp;utm_medium=RSS</link>
+   <guid isPermaLink="false">urn:http-billpcs-github-io:-2020-10-i-don-t-want-to-write-a-program-html</guid>
+   <pubDate>Tue, 27 Oct 2020 20:26:34 UT</pubDate>
+   <author>bill</author>
+   <description>
+&lt;p&gt;It was one of those times, I did not want to write a program to parse another program&amp;rsquo;s output. I was alright Googling around for &lt;code&gt;bash&lt;/code&gt; stuff for 10 minutes or so. Here is what I came up with.&lt;/p&gt;&lt;a href="http://billpcs.github.io/2020/10/i-don-t-want-to-write-a-program.html?utm_source=bash&amp;amp;utm_medium=RSS"&gt;&lt;em&gt;More&amp;hellip;&lt;/em&gt;&lt;/a&gt;</description></item></channel></rss>
